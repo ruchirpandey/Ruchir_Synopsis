@@ -24,8 +24,10 @@
 \title[DFIG-Solar PV Hybrid System]{DFIG-Solar PV Interconnected Hybrid Energy Generation System}
 \subtitle{Ph.D. Synopsis Presentation}
 \author[Ruchir Pandey]{Ruchir Pandey\\[0.3cm]{\small Supervisor: Dr. Sourav Bose}}
-\institute[NIT Uttarakhand]{Department of Electrical Engineering\\National Institute of Technology, Uttarakhand}
-\date{2026}
+\institute[NIT Uttarakhand]{\centering{\includegraphics[width=1.23cm, height=1.07cm]{images/logo.png}}\\[0.1cm]
+\centering{Department of Electrical Engineering\\National Institute of Technology, Uttarakhand}
+\date{January 27, 2026}}
+% \date{2026}
 
 \begin{document}
 
@@ -81,7 +83,7 @@ Integration of solar PV with DFIG wind turbines introduces:
 \begin{itemize}
     \item \textbf{Tightly coupled nonlinear dynamics} between RSC, GSC, and PV
     \item \textbf{Multi-timescale disturbances} (wind: seconds, solar: sub-seconds)
-    \item \textbf{Stringent grid code requirements} (THD $<$ 5\%, voltage $\pm$5\%)
+    \item \textbf{DC Link Voltage Control}
 \end{itemize}
 \end{alertblock}
 
@@ -110,7 +112,7 @@ Integration of solar PV with DFIG wind turbines introduces:
 
 \column{0.5\textwidth}
 \begin{alertblock}{Identified Gap}
-No comprehensive study applies \textbf{TD3} to integrated \textbf{DFIG-Solar PV} hybrid systems with:
+Comprehensive study aimed at application of \textbf{DDPG} and \textbf{TD3}  to integrated \textbf{DFIG-Solar PV} hybrid systems with:
 \begin{itemize}
     \item Direct DC-link coupling
     \item Unified RSC-GSC-PV control
@@ -133,9 +135,7 @@ Develop, implement, and experimentally validate DRL-based control strategies (DD
 \begin{enumerate}
     \item \textbf{Algorithm Implementation:}
     \begin{itemize}
-        \item Implement DDPG and TD3 for continuous converter control
-        \item Optimize neural network architectures
-        \item Develop curriculum learning strategies
+        \item Implement DDPG and TD3 for converter control
     \end{itemize}
 
     \item \textbf{Performance Validation:}
@@ -170,7 +170,6 @@ Develop, implement, and experimentally validate DRL-based control strategies (DD
 \vspace{0.3cm}
 \textbf{Advantages:}
 \begin{itemize}
-    \item Shared power electronics
     \item Reduced component count
     \item Eliminates separate DC-DC converter for PV
 \end{itemize}
@@ -302,7 +301,7 @@ y = r + \gamma \min_{i=1,2} Q_i'
 
 \vspace{0.3cm}
 \begin{alertblock}{Result}
-More stable training, better convergence, and improved deployment performance
+Longer training sessions but improved transient response 
 \end{alertblock}
 \end{frame}
 
@@ -315,9 +314,7 @@ More stable training, better convergence, and improved deployment performance
 \column{0.5\textwidth}
 \textbf{OPAL-RT OP4510 Platform:}
 \begin{itemize}
-    \item Real-time digital simulator
-    \item Sub-microsecond time steps
-    \item Industry-standard validation
+    \item Real-time simulator
     \item Realistic power system dynamics
 \end{itemize}
 
@@ -345,8 +342,7 @@ Run 5 & Combined disturbances \\
 \end{tabular}
 \end{block}
 
-\vspace{0.2cm}
-Initial conditions: Wind = 9 m/s, steady-state
+
 \end{columns}
 \end{frame}
 
@@ -379,7 +375,7 @@ Settling (ms) & 98 & 102 & 118 \\
 \end{itemize}
 
 \column{0.5\textwidth}
-\textbf{Solar PV Step (0 $\rightarrow$ 5 A):}
+\textbf{Solar PV Step (0 $\rightarrow$ 50 A):}
 
 \vspace{0.3cm}
 \begin{tabular}{lccc}
@@ -485,22 +481,7 @@ Power Factor & 0.97--0.99 & 0.97--0.99 & 0.95--0.98 \\
 % ============== SLIDE 15: Solar Integration Benefits ==============
 \begin{frame}{Solar PV Integration Benefits}
 \begin{columns}
-\column{0.5\textwidth}
-\textbf{Grid Power Transformation:}
 
-\vspace{0.3cm}
-\begin{tabular}{|l|c|c|}
-\hline
-\textbf{Parameter} & \textbf{No Solar} & \textbf{With Solar} \\
-\hline
-$I_{solar}$ & 0 A & 50 A \\
-$P_{solar}$ & 0 kW & 11.5 kW \\
-$P_{grid}$ & -8 to -5 kW & +3 to +6 kW \\
-\hline
-\end{tabular}
-
-\vspace{0.3cm}
-Negative-to-positive transition indicates transformation from \textbf{grid import} to \textbf{grid export} mode.
 
 \column{0.5\textwidth}
 \textbf{DC Link Voltage Improvement:}
@@ -527,10 +508,9 @@ Solar PV contributes to DC link stability (16-17\% improvement).
 % ============== SLIDE 16: Major Contributions ==============
 \begin{frame}{Major Contributions}
 \begin{enumerate}
-    \item \textbf{First TD3 Application to DFIG-PV Hybrid Systems}
+    \item \textbf{DRL Application to DFIG-PV Hybrid Systems}
     \begin{itemize}
-        \item Novel application of TD3 to integrated solar PV-DFIG systems
-        \item Addresses unique coupling dynamics in hybrid configurations
+        \item Application of DDPG and TD3 to integrated solar PV-DFIG systems
     \end{itemize}
 
     \vspace{0.2cm}
@@ -551,12 +531,38 @@ Solar PV contributes to DC link stability (16-17\% improvement).
     \item \textbf{HIL Experimental Validation}
     \begin{itemize}
         \item OPAL-RT OP4510 real-time validation
-        \item Demonstrates industrial deployment feasibility
+       
     \end{itemize}
 \end{enumerate}
 \end{frame}
 
 % ============== SLIDE 17: Publications ==============
+
+
+% ============== SECTION 8: Conclusion ==============
+\section{Conclusion}
+
+% ============== SLIDE 18: Conclusion ==============
+\begin{frame}{Conclusion}
+\begin{block}{Key Findings}
+\begin{itemize}
+    \item TD3 achieves \textbf{15\% faster response} and \textbf{17\% faster settling} than PI
+    \item Both DRL controllers outperform classical PI control
+    \item Solar PV integration improves DC-link stability 
+    %
+    \item HIL validation confirms practical  viability
+\end{itemize}
+\end{block}
+
+\vspace{0.3cm}
+\begin{block}{Trade-offs}
+\begin{itemize}
+    \item TD3 has higher training complexity but better dynamic performance
+    \item DDPG shows aggressive optimization, TD3 offers balanced multi-objective performance
+    \item Model-free nature enables adaptive control without accurate system models
+\end{itemize}
+\end{block}
+\end{frame}
 \begin{frame}{Publications}
 \textbf{Journal Publications:}
 \begin{enumerate}
@@ -572,69 +578,24 @@ Solar PV contributes to DC link stability (16-17\% improvement).
     \item R. Pandey, S. Bose, P. Dwivedi, and S. Negi, ``Real-time performance investigation of a solar PV integrated DFIG system,'' in \textit{Proc. IEEE PIICON}, New Delhi, India, Nov. 2022.
 \end{enumerate}
 \end{frame}
-
-% ============== SECTION 8: Conclusion ==============
-\section{Conclusion}
-
-% ============== SLIDE 18: Conclusion ==============
-\begin{frame}{Conclusion}
-\begin{block}{Key Findings}
-\begin{itemize}
-    \item TD3 achieves \textbf{15\% faster response} and \textbf{17\% faster settling} than PI
-    \item Both DRL controllers outperform classical PI control
-    \item TD3 provides more \textbf{stable training} and \textbf{balanced performance}
-    \item Solar PV integration improves DC-link stability by 16-17\%
-    \item HIL validation confirms practical deployment viability
-\end{itemize}
-\end{block}
-
-\vspace{0.3cm}
-\begin{block}{Trade-offs}
-\begin{itemize}
-    \item TD3 has higher training complexity but better deployment reliability
-    \item DDPG shows aggressive optimization, TD3 offers balanced multi-objective performance
-    \item Model-free nature enables adaptive control without accurate system models
-\end{itemize}
-\end{block}
-\end{frame}
-
 % ============== SLIDE 19: Future Scope ==============
 \begin{frame}{Future Scope}
-\begin{columns}
-\column{0.5\textwidth}
-\textbf{Algorithm Enhancements:}
+
+
+\textbf{Scalability and Transferability Approaches:} 
 \begin{itemize}
-    \item Multi-agent DRL for wind farms
-    \item Physics-informed neural networks
-    \item Transfer learning across conditions
-    \item Fault ride-through capability
+    \item Future work should investigate Multi-Agent Reinforcement Learning (MARL) frameworks, where each converter or turbine acts as a cooperative agent, to enable decentralized control of entire wind and solar farms 
 \end{itemize}
 
-\vspace{0.3cm}
-\textbf{System Extensions:}
+
+
+\textbf{Advanced Comparative Studies and Hybrid Architectures:}
 \begin{itemize}
-    \item Battery energy storage integration
-    \item Grid fault response
-    \item Microgrid coordination
+    \item  An exhaustive comparative analysis should be conducted against other state-of-the-art control strategies, including Model Predictive Control (MPC) and other DRL algorithms like Soft Actor-Critic (SAC) 
 \end{itemize}
 
-\column{0.5\textwidth}
-\textbf{Deployment Considerations:}
-\begin{itemize}
-    \item Embedded implementation
-    \item Real-time computational optimization
-    \item Field testing and validation
-    \item Safety-constrained learning
-\end{itemize}
 
-\vspace{0.3cm}
-\textbf{Scalability:}
-\begin{itemize}
-    \item Large-scale wind-solar farms
-    \item Grid-level coordination
-    \item Market participation
-\end{itemize}
-\end{columns}
+
 \end{frame}
 
 % ============== SLIDE 20: Thank You ==============
@@ -643,16 +604,9 @@ Solar PV contributes to DC link stability (16-17\% improvement).
 \vspace{2cm}
 {\Huge\textbf{Thank You}}
 
-\vspace{1cm}
-{\Large Questions?}
 
-\vspace{1.5cm}
-{\large Ruchir Pandey}\\
-{\small Department of Electrical Engineering}\\
-{\small National Institute of Technology, Uttarakhand}
 
-\vspace{0.5cm}
-{\small Supervisor: Dr. Sourav Bose}
+
 \end{center}
 \end{frame}
 
