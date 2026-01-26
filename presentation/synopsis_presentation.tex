@@ -25,9 +25,8 @@
 \subtitle{Ph.D. Synopsis Presentation}
 \author[Ruchir Pandey]{Ruchir Pandey\\[0.3cm]{\small Supervisor: Dr. Sourav Bose}}
 \institute[NIT Uttarakhand]{\centering{\includegraphics[width=1.23cm, height=1.07cm]{images/logo.png}}\\[0.1cm]
-\centering{Department of Electrical Engineering\\National Institute of Technology, Uttarakhand}
-\date{January 27, 2026}}
-% \date{2026}
+\centering{Department of Electrical Engineering\\National Institute of Technology, Uttarakhand}}
+\date{January 27, 2026}
 
 \begin{document}
 
@@ -157,7 +156,7 @@ Develop, implement, and experimentally validate DRL-based control strategies (DD
 % ============== SLIDE 7: System Architecture ==============
 \begin{frame}{DFIG-Solar PV Hybrid System Architecture}
 \begin{columns}
-\column{0.5\textwidth}
+\column{0.45\textwidth}
 \textbf{Key Components:}
 \begin{itemize}
     \item DFIG wind turbine
@@ -167,21 +166,20 @@ Develop, implement, and experimentally validate DRL-based control strategies (DD
     \item DC link capacitor
 \end{itemize}
 
-\vspace{0.3cm}
-\textbf{Advantages:}
+\vspace{0.2cm}
+\textbf{Control Objectives:}
 \begin{itemize}
-    \item Reduced component count
-    \item Eliminates separate DC-DC converter for PV
-\end{itemize}
-
-\column{0.5\textwidth}
-\begin{block}{Control Objectives}
-\begin{itemize}
-    \item \textbf{RSC:} Rotor current control, torque regulation, MPPT
-    \item \textbf{GSC:} DC-link voltage, grid power exchange
+    \item \textbf{RSC:} Rotor current, torque, MPPT
+    \item \textbf{GSC:} DC-link voltage, grid power
     \item \textbf{PV:} Maximum power extraction
 \end{itemize}
-\end{block}
+
+\column{0.55\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/Updated_DFIG_Topology.png}
+    \caption{DFIG-Solar PV hybrid system topology}
+\end{figure}
 \end{columns}
 \end{frame}
 
@@ -312,13 +310,14 @@ Longer training sessions but improved transient response
 \begin{frame}{Hardware-in-the-Loop Experimental Setup}
 \begin{columns}
 \column{0.5\textwidth}
-\textbf{OPAL-RT OP4510 Platform:}
+\textbf{OPAL-RT OP5700 Platform:}
 \begin{itemize}
-    \item Real-time simulator
-    \item Realistic power system dynamics
+    \item Real-time digital simulator
+    \item Intel Xeon processor, RedHawk Linux RTOS
+    \item 1 ms sampling time
 \end{itemize}
 
-\vspace{0.3cm}
+\vspace{0.2cm}
 \textbf{Test Scenarios:}
 \begin{itemize}
     \item Steady-state operation
@@ -328,21 +327,11 @@ Longer training sessions but improved transient response
 \end{itemize}
 
 \column{0.5\textwidth}
-\begin{block}{Experimental Runs}
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Run} & \textbf{Objective} \\
-\hline
-Run 1 & DFIG baseline (no PV) \\
-Run 2 & With solar integration \\
-Run 3 & Comparative analysis \\
-Run 4 & Multi-scenario tests \\
-Run 5 & Combined disturbances \\
-\hline
-\end{tabular}
-\end{block}
-
-
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/opalrt.png}
+    \caption{OPAL-RT HIL platform}
+\end{figure}
 \end{columns}
 \end{frame}
 
@@ -393,7 +382,38 @@ TD3 maintains tightest voltage regulation under solar disturbances
 \end{columns}
 \end{frame}
 
-% ============== SLIDE 13: Rotor Current Results ==============
+% ============== SLIDE 13: DC Link Voltage Experimental Results ==============
+\begin{frame}{DC Link Voltage: Experimental Results}
+\begin{columns}
+\column{0.33\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/PID_Vdc.png}
+    \caption{PI Controller}
+\end{figure}
+
+\column{0.33\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/DDPG_Vdc.png}
+    \caption{DDPG Controller}
+\end{figure}
+
+\column{0.33\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/TD3_Vdc.jpg}
+    \caption{TD3 Controller}
+\end{figure}
+\end{columns}
+
+\vspace{0.3cm}
+\begin{center}
+\textbf{TD3 demonstrates fastest recovery and tightest voltage regulation}
+\end{center}
+\end{frame}
+
+% ============== SLIDE 14: Rotor Current Results ==============
 \begin{frame}{Rotor Current Dynamic Response}
 \textbf{Simultaneous Wind + Solar Variations (Most Challenging Scenario):}
 
@@ -440,7 +460,38 @@ Overshoot (\%) & 4.4 & 4.6 & 5.0 \\
 \end{columns}
 \end{frame}
 
-% ============== SLIDE 14: Overall Performance ==============
+% ============== SLIDE 15: Rotor Current Experimental Results ==============
+\begin{frame}{Rotor Current: Experimental Results}
+\begin{columns}
+\column{0.33\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/PID_Rotor_current.png}
+    \caption{PI Controller}
+\end{figure}
+
+\column{0.33\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/DDPG_Rotor_current.png}
+    \caption{DDPG Controller}
+\end{figure}
+
+\column{0.33\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/TD3_Rotor_current.png}
+    \caption{TD3 Controller}
+\end{figure}
+\end{columns}
+
+\vspace{0.3cm}
+\begin{center}
+\textbf{TD3 shows smoothest transient response with optimal damping}
+\end{center}
+\end{frame}
+
+% ============== SLIDE 16: Overall Performance ==============
 \begin{frame}{Overall System Performance Comparison}
 \begin{center}
 \begin{tabular}{lccc}
@@ -500,6 +551,30 @@ TD3 & $\pm$4.6\% & $\pm$3.8\% \\
 \vspace{0.3cm}
 Solar PV contributes to DC link stability (16-17\% improvement).
 \end{columns}
+\end{frame}
+
+% ============== SLIDE: Solar Power Integration Results ==============
+\begin{frame}{Solar PV Integration: Experimental Validation}
+\begin{columns}
+\column{0.5\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/Run2_M1_PSolar.png}
+    \caption{Solar power response (Run 2)}
+\end{figure}
+
+\column{0.5\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{images/Run2_M2_Powers.png}
+    \caption{System power response (Run 2)}
+\end{figure}
+\end{columns}
+
+\vspace{0.2cm}
+\begin{center}
+\textbf{Successful solar PV integration with smooth power transitions}
+\end{center}
 \end{frame}
 
 % ============== SECTION 7: Contributions ==============
