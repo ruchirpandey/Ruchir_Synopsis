@@ -335,6 +335,52 @@ Longer training sessions but improved transient response
 \end{columns}
 \end{frame}
 
+% ============== SLIDE: Experimental Runs ==============
+\begin{frame}{Experimental Runs Overview}
+\begin{columns}
+\column{0.55\textwidth}
+\begin{block}{Experimental Runs}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Run} & \textbf{Objective} \\
+\hline
+Run 1 & DFIG baseline (no PV) \\
+Run 2 & With solar integration \\
+Run 3 & Comparative analysis \\
+Run 4 & Multi-scenario tests \\
+Run 5 & Combined disturbances \\
+\hline
+\end{tabular}
+\end{block}
+
+\vspace{0.3cm}
+\textbf{Controllers Tested:}
+\begin{itemize}
+    \item Conventional PI control
+    \item DDPG-based control
+    \item TD3-based control
+\end{itemize}
+
+\column{0.45\textwidth}
+\textbf{Measured Parameters:}
+\begin{itemize}
+    \item DC link voltage ($V_{dc}$)
+    \item Rotor current ($i_r$)
+    \item Solar power ($P_{solar}$)
+    \item Grid power ($P_{grid}$)
+    \item Rotor power ($P_{rotor}$)
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Performance Metrics:}
+\begin{itemize}
+    \item Rise time, settling time
+    \item Overshoot percentage
+    \item Voltage regulation
+\end{itemize}
+\end{columns}
+\end{frame}
+
 % ============== SECTION 6: Results ==============
 \section{Results and Analysis}
 
