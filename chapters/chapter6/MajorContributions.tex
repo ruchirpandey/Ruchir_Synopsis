@@ -1,0 +1,511 @@
+\section{Major Contributions}
+
+This chapter presents a detailed discussion of the simulation and experimental results obtained from the proposed deep reinforcement learning based control framework applied to the integrated DFIG--Solar PV hybrid energy generation system. The performance of the proposed controllers is evaluated under diverse operating conditions and compared extensively with conventional PI-based control strategies.
+\subsection{Overall Configuration}
+
+The hybrid system consists of a DFIG-based wind turbine with its stator connected to the grid and a back-to-back converter at its rotor. A solar PV array is integrated at the common DC link between the RSC and GSC (Figure~\ref{fig:system_architecture}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/Updated_DFIG_Topology.png}
+    \caption{System architecture of DFIG-Solar PV hybrid system with DDPG-based unified controller}
+    \label{fig:system_architecture}
+\end{figure}
+
+
+
+\textbf{Key Components:} The system comprises five main components. The DFIG wind turbine converts mechanical wind energy to electrical energy, while the Rotor Side Converter (RSC) controls rotor currents and electromagnetic torque. The Grid Side Converter (GSC) regulates DC link voltage and manages grid power exchange, and the Solar PV array injects variable DC current based on solar irradiation. The DC link capacitor provides an energy buffer between the converters.
+
+This topology eliminates the need for separate DC-DC boost converters and inverters for the PV system, reducing system complexity and cost.
+\subsection{Performance under Variable Wind Speed Conditions}
+
+The hybrid system is first evaluated under varying wind speed profiles to assess the ability of the proposed control strategies to maintain stable operation and accurate power tracking. Under conventional PI-based control, fluctuations in wind speed lead to noticeable oscillations in electromagnetic torque, rotor speed, and stator active power. These oscillations are accompanied by increased settling time and overshoot, particularly during rapid wind speed transitions.
+
+In contrast, the deep reinforcement learning based controllers exhibit significantly improved performance. The DDPG-based controller demonstrates faster adaptation to changing wind conditions and improved torque regulation compared to PI control. However, minor oscillations are observed during aggressive transients, indicating sensitivity to exploration noise and critic estimation errors.
+
+The TD3-based controller outperforms both PI and DDPG controllers by providing smooth torque response, reduced oscillations, and faster settling time. The incorporation of twin critic networks and delayed policy updates results in enhanced stability and consistent performance across a wide range of wind speeds.
+
+\subsection{Response to Solar Irradiance Variations}
+
+To evaluate the impact of solar intermittency, the system is subjected to step and ramp variations in solar irradiance. Under PI-based control, sudden changes in irradiance lead to DC-link voltage fluctuations and temporary mismatch between generated and injected power. The coupling between PV and wind subsystems through the DC-link exacerbates these effects.
+
+The proposed DRL-based controllers effectively mitigate these issues by learning coordinated control actions for both wind and solar subsystems. The DDPG controller achieves improved DC-link voltage regulation compared to PI control, while the TD3 controller maintains near-constant DC-link voltage with minimal deviation even during rapid irradiance changes.
+
+\section{Dynamic Response Analysis}
+\label{sec:dynamic_response}
+
+This section analyzes the dynamic response characteristics of all three controllers under test scenarios from Chapter~\ref{chap:td3}, validating the DRL advantages (Chapter~\ref{chap:rl}) and TD3 innovations.
+
+\subsection{Solar PV Current Step Response}
+\label{subsec:pv_step_response}
+
+Figure~\ref{fig:pv_step} illustrates system response to a solar PV current step (0 A to 5 A at $t = 5$ s), testing DC link voltage stability during sudden PV power injection. This evaluates GSC control and voltage regulation.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Run4_M1_Solar.png}
+    \caption{System response to solar PV current step showing}
+    \label{fig:pv_step}
+\end{figure}
+
+\textbf{Comparative Performance:} TD3 maintained voltage regulation within $\pm 4.6$\% with settling time < 90 ms, minimal overshoot, smooth trajectory without oscillations, and steady-state error < 0.5\%. DDPG achieved $\pm 4.8$\% regulation with slightly longer settling and minor oscillations, occasionally exhibiting aggressive actions from single-critic overestimation . PI control showed $\pm 5$\% regulation with settling > 120 ms and largest overshoot, reflecting fixed-gain limitations for nonlinear coupled PV-DC link-GSC dynamics.
+
+\subsection{Wind Speed Step Response}
+\label{subsec:wind_step_response}
+
+Figure~\ref{fig:wind_step} presents DC link voltage response to wind speed step (10 m/s to 11.2 m/s at $t = 5$ s), evaluating RSC control and rotor speed tracking objectives .
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/PID_Vdc.png}
+        \caption{PI controller}
+        \label{fig:vdc_pi}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/DDPG_Vdc.png}
+        \caption{DDPG controller}
+        \label{fig:vdc_ddpg}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/TD3_Vdc.jpg}
+        \caption{TD3 controller}
+        \label{fig:vdc_td3}
+    \end{subfigure}
+    \caption{Dynamic response of DC link voltage to wind speed step change}
+    \label{fig:wind_step}
+\end{figure}
+
+\textbf{Performance Comparison:} TD3 achieved fastest recovery with 12\% peak deviation and 12 ms rise time. DDPG showed 15\% peak deviation and 13 ms rise time. PI exhibited 18\% peak deviation and 15 ms rise time. Settling times: TD3 (98 ms), DDPG (102 ms), PI (118 ms). All controllers achieved < 1\% steady-state error, though TD3 exhibited minimal steady-state oscillation.
+
+Wind speed increases require coordinated RSC voltage adjustment for optimal power extraction while maintaining grid synchronization. 
+
+\subsection{Rotor Current Response}
+\label{subsec:rotor_current_response}
+
+Figure~\ref{fig:rotor_current} illustrates rotor current response to simultaneous wind speed and solar PV variations, the most challenging coupled disturbance scenario.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/PID_Rotor_current.png}
+        \caption{PI controller}
+        \label{fig:rotor_pi}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/DDPG_Rotor_current.png}
+        \caption{DDPG controller}
+        \label{fig:rotor_ddpg}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/TD3_Rotor_current.png}
+        \caption{TD3 controller}
+        \label{fig:rotor_td3}
+    \end{subfigure}
+    \caption{Dynamic response of rotor current to simultaneous variations in wind speed and solar PV input}
+    \label{fig:rotor_current}
+\end{figure}
+
+\textbf{Performance Comparison:} TD3 achieved smoothest transient with 34 ms settling, optimal damping, and no secondary oscillations. DDPG showed 36 ms settling with minor secondary oscillations from single-critic overestimation. PI exhibited 40 ms settling with persistent oscillations from fixed-gain limitations.
+
+
+\section{Quantitative Performance Comparison}
+\label{sec:quantitative_comparison}
+
+This section presents comprehensive quantitative metrics validating DRL advantages and TD3 innovations 
+\subsection{Overall System Performance}
+\label{subsec:overall_performance}
+
+Table~\ref{tab:overall_performance} presents aggregate metrics averaged across all test scenarios.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparative performance analysis across all test scenarios}
+\label{tab:overall_performance}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{TD3} & \textbf{DDPG} & \textbf{PI Control} \\
+\midrule
+Response Time (ms) & 72 & 80 & 85 \\
+Power Overshoot (\%) & 7.0 & 7.2 & 7.8 \\
+DC Link Voltage Regulation (\%) & $\pm 4.6$ & $\pm 4.8$ & $\pm 5$ \\
+Settling Time (ms) & 98 & 102 & 118 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{TD3 vs PI Control:} TD3 achieves 15.3\% faster response time (72 vs 85 ms), 10.3\% lower power overshoot (7.0\% vs 7.8\%), 8\% tighter voltage regulation ($\pm 4.6$\% vs $\pm 5$\%), and 16.9\% faster settling (98 vs 118 ms).
+
+\textbf{TD3 vs DDPG:} TD3 achieves 10\% faster response (72 vs 80 ms), 2.8\% lower overshoot (7.0\% vs 7.2\%), 4.2\% tighter regulation ($\pm 4.6$\% vs $\pm 4.8$\%), and 3.9\% faster settling (98 vs 102 ms).
+
+\subsection{Rotor Side Converter Performance}
+\label{subsec:rsc_performance}
+
+Table~\ref{tab:rsc_performance} presents RSC metrics evaluating rotor current control and stator power tracking.
+
+\begin{table}[htbp]
+\centering
+\caption{Rotor side converter performance comparison}
+\label{tab:rsc_performance}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Controller} & \textbf{Rise Time (ms)} & \textbf{Settling Time (ms)} & \textbf{Overshoot (\%)} \\
+\midrule
+PI Controller & 15 & 40 & 5.0 \\
+DDPG Controller & 13 & 36 & 4.6 \\
+TD3 Controller & 12 & 34 & 4.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Performance Improvements:} TD3 vs DDPG: 7.7\% faster rise time (12 vs 13 ms), 5.6\% faster settling (34 vs 36 ms), 4.3\% lower overshoot (4.4\% vs 4.6\%). TD3 vs PI: 20\% faster rise time (12 vs 15 ms), 15\% faster settling (34 vs 40 ms), 12\% lower overshoot (4.4\% vs 5.0\%).
+
+
+\subsection{Grid Side Converter Performance}
+\label{subsec:gsc_performance}
+
+Table~\ref{tab:gsc_performance} compares GSC metrics for DC link voltage regulation and power quality. GSC control is challenging due to managing power flow from both RSC and integrated solar PV.
+
+\begin{table}[htbp]
+\centering
+\caption{Grid side converter performance comparison}
+\label{tab:gsc_performance}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Controller} & \textbf{DC Link Regulation} & \textbf{Power Factor} \\
+\midrule
+PI Controller & $\pm 5\%$ & 0.95--0.98 \\
+DDPG Controller & $\pm 4.8\%$ & 0.97--0.99 \\
+TD3 Controller & $\pm 4.6\%$ & 0.97--0.99 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Findings:} TD3 achieves tightest voltage regulation ($\pm 4.6$\%), 8\% better than PI ($\pm 5$\%) and 4.2\% better than DDPG ($\pm 4.8$\%). Both DRL controllers achieve 0.97--0.99 power factor versus 0.95--0.98 for PI, enabling better grid support. TD3 demonstrates fastest disturbance recovery and robust performance across 200--1000 W/m\textsuperscript{2} solar irradiance.
+
+
+
+% ============================================================
+% COMPREHENSIVE EXPERIMENTAL VALIDATION RUNS
+% ============================================================
+
+\section{Comprehensive Experimental Validation Runs}
+\label{sec:experimental_runs}
+
+This section presents experimental validation results from the OPAL-RT OP4510 HIL platform,  validating controller performance across multiple operating scenarios.
+
+\subsection{Experimental Test Overview}
+\label{subsec:test_campaign_overview}
+
+Five experimental runs validated different aspects of system behavior:
+
+\begin{table}[htbp]
+\centering
+\caption{Experimental Validation Test}
+\label{tab:test_campaign}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Run} & \textbf{Objective} & \textbf{Key Variables} \\
+\hline
+Run 1 & DFIG baseline without solar PV & $P_{rotor}$, $V_{dc}$, $P_{grid}$, $P_{dc}$ \\
+Run 2 & DFIG with solar PV integration & $P_{solar}$, $I_{solar}$, $V_{dc}$, $P_{grid}$, $P_{rotor}$ \\
+Run 3 & Comparative analysis (Run 1 vs Run 2) & $\Delta P_{grid}$, $\Delta V_{dc}$, power flow \\
+Run 4 & Multi-scenario wind and solar variations & Dynamic response, transients \\
+Run 5 & Combined disturbances & Coupled dynamics, robustness \\
+\hline
+\end{tabular}
+\end{table}
+
+All experiments used identical initial conditions (wind speed = 9 m/s, steady-state) for reproducibility.
+
+\subsection{Run 1: DFIG Baseline Performance Without Solar PV}
+\label{subsec:run1_baseline}
+
+Run 1 established baseline DFIG performance ($I_{solar} = 0$ A) with wind speed 10--11.5 m/s, operating in both subsynchronous and supersynchronous modes.
+
+\textbf{Power Flow:} Subsynchronous: Grid $\rightarrow$ GSC $\rightarrow$ RSC $\rightarrow$ Rotor. Supersynchronous: bidirectional. Grid power managed DC link balance:
+\begin{equation}
+P_{grid} = P_{rotor,dc} + P_{losses} - P_{pv}
+\label{eq:run1_power_balance}
+\end{equation}
+where $P_{pv} = 0$ for Run 1. DC link voltage maintained acceptable regulation with transient characteristics varying by controller type.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run1_M3_RotorCurrent.png}
+        \caption{Rotor current response (three-phase)}
+        \label{fig:run1_rotor_current}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run1_M4_Powers.png}
+        \caption{Power measurements: $P_{rotor}$ (yellow), $P_{grid}$ (blue), $P_{dc}$ (magenta)}
+        \label{fig:run1_powers}
+    \end{subfigure}
+    \caption{Run 1 baseline performance without solar PV}
+    \label{fig:run1_results}
+\end{figure}
+
+\textbf{Key Observations:} Grid must supply all DC link power during subsynchronous operation. Controller performance differences (PI, DDPG, TD3) observable in transient response and voltage regulation accuracy.
+
+\subsection{Run 2: DFIG Performance With Solar PV Integration}
+\label{subsec:run2_integrated}
+
+Run 2 evaluated solar PV integration effects with $I_{solar} = 50$ A at the DC link, using the same wind profile as Run 1.
+
+\textbf{Modified Power Balance:}
+\begin{equation}
+C\frac{dV_{dc}}{dt} = i_{pv} + i_{r,dc} - i_{g,dc}
+\label{eq:run2_dc_balance}
+\end{equation}
+\begin{equation}
+P_{grid,new} = P_{grid,baseline} - P_{solar}
+\label{eq:run2_grid_reduction}
+\end{equation}
+
+With $I_{solar} = 50$ A: $P_{solar} = V_{dc} \times I_{solar} \approx 230$ V $\times$ 50 A = 11.5 kW.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run2_M1_PSolar.png}
+        \caption{Solar power injection: $I_{solar}$ (blue), $P_{solar}$ (yellow), $V_{dc}$ (magenta)}
+        \label{fig:run2_solar}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run2_M2_Powers.png}
+        \caption{System powers with solar: $P_{rotor}$ (yellow), $P_{grid}$ (blue), $P_{dc}$ (magenta)}
+        \label{fig:run2_powers}
+    \end{subfigure}
+    \caption{Run 2 performance with solar PV integration}
+    \label{fig:run2_results}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/Run2_M3_RotorCurrent.png}
+    \caption{Run 2 three-phase rotor current response with solar PV integration. }
+    \label{fig:run2_rotor_current}
+\end{figure}
+
+\textbf{Key Observations:} Solar PV did not affect $P_{rotor}$ (remains wind-determined). Enhanced DC link voltage stability. Grid power offset: $P_{grid,Run2} \approx P_{grid,Run1} - P_{solar}$, transforming from grid import to potential export. TD3 demonstrated superior management of coupled solar-grid dynamics.
+
+\subsection{Run 3: Comparative Analysis - Baseline vs. Solar-Integrated}
+\label{subsec:run3_comparative}
+
+Run 3 systematically compared baseline (Run 1) and solar-integrated (Run 2) performance, quantifying solar PV integration benefits.
+
+\textbf{Rotor Power:} $P_{rotor,Run2} \approx P_{rotor,Run1}$, validating independent wind energy extraction.
+
+\textbf{Grid Power:}
+\begin{table}[htbp]
+\centering
+\caption{Grid Power Comparison: Run 1 vs Run 2}
+\label{tab:run3_grid_comparison}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Run 1 (No Solar)} & \textbf{Run 2 (With Solar)} & \textbf{Change} \\
+\hline
+Wind Speed & 10 $\rightarrow$ 11.5 m/s & 10 $\rightarrow$ 11.5 m/s & - \\
+$I_{solar}$ & 0 A & 50 A & +50 A \\
+$P_{solar}$ & 0 kW & 11.5 kW & +11.5 kW \\
+$P_{grid}$ (typical) & -8 to -5 kW & +3 to +6 kW & $\approx$ +11 kW \\
+\hline
+\end{tabular}
+\end{table}
+
+Negative-to-positive $P_{grid}$ transition indicates transformation from grid import to export mode.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run1_M4_Powers.png}
+        \caption{Run 1: Without solar PV - $P_{grid}$ oscillates around 0}
+        \label{fig:run3_without_solar}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run2_M2_Powers.png}
+        \caption{Run 2: With solar PV - $P_{grid}$ reduced significantly}
+        \label{fig:run3_with_solar}
+    \end{subfigure}
+    \caption{Run 3 comparative analysis}
+    \label{fig:run3_comparison}
+\end{figure}
+
+\textbf{Voltage Regulation:}
+\begin{table}[htbp]
+\centering
+\caption{DC Link Voltage Regulation Comparison}
+\label{tab:run3_voltage_comparison}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Controller} & \textbf{Run 1: $\Delta V_{dc}$ (\%)} & \textbf{Run 2: $\Delta V_{dc}$ (\%)} & \textbf{Improvement} \\
+\hline
+PI Controller & $\pm 5.0$ & $\pm 4.2$ & 16\% \\
+DDPG Controller & $\pm 4.8$ & $\pm 4.0$ & 17\% \\
+TD3 Controller & $\pm 4.6$ & $\pm 3.8$ & 17\% \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Key Insights:} Solar assists voltage stability, rotor-side operation remains independent, grid dependency reduced (import $\rightarrow$ export), and TD3 maintains performance advantage.
+
+\subsection{Run 4: Multi-Scenario Wind and Solar Variations}
+\label{subsec:run4_multiscenario}
+
+Run 4 tested controller adaptability across multiple operating scenarios:
+
+\begin{table}[htbp]
+\centering
+\caption{Run 4 Test Scenarios}
+\label{tab:run4_scenarios}
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Scenario} & \textbf{Wind Speed (m/s)} & \textbf{$I_{solar}$ (A)} & \textbf{Operating Mode} \\
+\hline
+M1 (Baseline) & 11.2 (fixed) & 0 $\rightarrow$ 30 $\rightarrow$ 50 & Supersynchronous \\
+M2 (Low Wind) & 10.0 & 0 $\rightarrow$ 30 & Subsynchronous \\
+M3 (High Wind) & 11.5 (fixed) & Variable ramp & Supersynchronous \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Scenario M1 (Solar Ramp, Fixed Wind):} With wind fixed at 11.2 m/s, $I_{solar}$ ramped 0 $\rightarrow$ 50 A. $V_{dc}$ remained remarkably constant despite 11.5 kW solar power increase. Rotor current unchanged. Grid power decreased proportionally: $\Delta P_{grid} \approx -\Delta P_{solar}$.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Run4_M1_Solar.png}
+    \caption{Run 4 Scenario M1: Solar current ramp response with fixed wind speed}
+    \label{fig:run4_m1}
+\end{figure}
+
+\textbf{Scenario M2 (Subsynchronous):} At 10.0 m/s wind ($N_r < N_s$), power flow: Grid $\rightarrow$ GSC $\rightarrow$ RSC $\rightarrow$ Rotor. Solar PV offset grid import, improved efficiency, enhanced voltage stability.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Run4_M2_Powers.png}
+    \caption{Run 4 Scenario M2: Subsynchronous operation power flow analysis} 
+    \label{fig:run4_m2}
+\end{figure}
+
+\textbf{Scenario M3 (High Wind, Variable Solar):} At 11.5 m/s with continuous solar variations, rotor-side maintained MPPT, voltage stability preserved despite high throughput, TD3 $>$ DDPG $>$ PI ranking maintained.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/Run4_M3_Rotor_Current.png}
+    \caption{Run 4 Scenario M3: Rotor current response under constant wind speed and variable solar irradiance}
+    \label{fig:run4_m3_rotor_current}
+\end{figure}
+
+\textbf{Summary:}
+
+\subsection{Run 5: Combined Wind and Solar Disturbances}
+\label{subsec:run5_combined}
+
+\subsubsection{Test Objective}
+
+Run 5 presented the most challenging scenario: simultaneous variations in both wind speed and solar irradiance, testing controller performance under realistic coupled disturbances representing actual field conditions.
+
+\textbf{Test Configuration:}
+\begin{itemize}
+    \item Time 0--5 s: Wind 10 m/s, $I_{solar} = 0$ A (baseline)
+    \item Time 5--10 s: Wind ramp to 11.2 m/s, $I_{solar}$ ramp to 30 A
+    \item Time 10--15 s: Hold wind at 11.2 m/s, $I_{solar}$ step to 50 A
+\end{itemize}
+
+
+
+\subsubsection{Controller Performance Comparison}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run5_M1_Solar.png}
+        \caption{Solar variables during combined disturbances}
+        \label{fig:run5_solar}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run5_M2_Powers.png}
+        \caption{System powers under coupled wind-solar variations}
+        \label{fig:run5_powers}
+    \end{subfigure}
+    \\[1ex]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run5_M3_RotorCurrent.png}
+        \caption{Rotor current response to simultaneous disturbances}
+        \label{fig:run5_rotor}
+    \end{subfigure}
+    \caption{Run 5 combined wind and solar disturbances}
+    \label{fig:run5_comparison}
+\end{figure}
+
+\textbf{TD3 Controller Performance:}
+
+Under coupled disturbances, TD3 demonstrated exceptional performance:
+\begin{itemize}
+    \item DC voltage overshoot: < 5\%
+    \item Settling time: < 100 ms
+    \item No oscillations or instability
+    \item Smooth power transitions
+\end{itemize}
+
+The twin-critic architecture and target policy smoothing enabled TD3 to handle the complex multi-input disturbance scenario effectively.
+
+\textbf{DDPG Controller Performance:}
+
+DDPG showed good performance:
+\begin{itemize}
+    \item DC voltage overshoot: 5--7\%
+    \item Settling time: 110--120 ms
+    \item Minor oscillations during transients
+    \item Occasional aggressive control actions
+\end{itemize}
+
+The single-critic overestimation occasionally produced suboptimal actions during the most challenging transients.
+
+\textbf{PI Controller Performance:}
+
+PI control exhibited significant limitations:
+\begin{itemize}
+    \item DC voltage overshoot: 8--10\%
+    \item Settling time: 140--160 ms
+    \item Pronounced oscillations
+    \item Sluggish adaptation to disturbances
+\end{itemize}
+
+
+
+\subsubsection{Run 5 Key Observations}
+
+\begin{enumerate}
+    \item \textbf{Solar PV maintains DC link stability:} Even under simultaneous wind variations, solar contribution helped maintain DC voltage within acceptable bounds
+    
+    \item \textbf{TD3 robustness validated:} The superior performance of TD3 under coupled disturbances validates the theoretical advantages of twin-critic architecture and delayed policy updates
+    
+    \item \textbf{Real-world applicability:} Run 5 conditions most closely simulate actual field operation with variable wind and solar, demonstrating practical deployment viability
+\end{enumerate}
+
+

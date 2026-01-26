@@ -1,0 +1,19 @@
+
+\section{Research Objectives}
+
+This thesis seeks to address the complex control challenges of hybrid DFIG–PV systems through advanced deep reinforcement learning (DRL) methodologies. The primary objective is to design, implement, and evaluate DRL-based controllers capable of learning optimal control policies under nonlinear, coupled, and uncertain operating conditions.
+
+\textbf{Primary Objective:} \textit{Develop, implement, and experimentally validate DRL-based control strategies (DDPG and TD3) that achieve superior dynamic performance compared to classical PI-based methods in solar PV–integrated DFIG wind energy systems, while providing comprehensive comparative analysis of the two algorithms.}
+
+\textbf{Specific Objectives:}
+\begin{enumerate}
+   
+
+    \item \textbf{Algorithm Implementation:} Implement both DDPG \cite{Lillicrap2015} and TD3 \cite{Fujimoto2018} algorithms tailored for continuous control of power electronic converters. Address DDPG limitations through TD3 enhancements: clipped double Q-learning, delayed policy updates, and target policy smoothing. Optimize neural network architectures and hyperparameters using established DRL tuning methodologies \cite{Zholtayev2024}. Develop curriculum learning strategies to facilitate policy convergence for multi-objective control tasks. 
+
+    \item \textbf{Performance Validation:} Conduct extensive Hardware-in-the-Loop (HIL) experiments using the OPAL-RT platform. Design comprehensive test scenarios covering: steady-state operation, transient disturbances, variable renewable inputs, and grid fault conditions. Compare DRL controllers (both DDPG and TD3) with classical PI under identical test conditions and performance metrics. Quantify improvements in: settling time, overshoot, response speed, DC-link voltage regulation. 
+
+    \item \textbf{Critical Analysis and Algorithmic Comparison:} Provide detailed comparative analysis of DDPG vs. TD3 performance in the specific context of DFIG-PV hybrid systems. Identify operating scenarios where each DRL algorithm demonstrates marked superiority or limitations.
+
+    
+\end{enumerate}
