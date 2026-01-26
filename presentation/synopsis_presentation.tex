@@ -1,0 +1,670 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% Theme and color
+\usetheme{Madrid}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% Packages
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{xcolor}
+
+% Custom colors
+\definecolor{nitblue}{RGB}{0,51,153}
+\definecolor{saffron}{RGB}{255,153,51}
+\setbeamercolor{title}{fg=white,bg=nitblue}
+\setbeamercolor{frametitle}{fg=white,bg=nitblue}
+\setbeamercolor{block title}{fg=white,bg=nitblue}
+
+% Title information
+\title[TD3 for DFIG-PV Systems]{Twin-Delayed Deep Deterministic Policy Gradient for Enhanced Power Optimization in Solar PV-Integrated DFIG Wind Energy Systems}
+\subtitle{Ph.D. Synopsis Presentation}
+\author[Ruchir Pandey]{Ruchir Pandey\\[0.3cm]{\small Supervisor: Dr. Shantanu Bose}}
+\institute[NIT Uttarakhand]{Department of Electrical Engineering\\National Institute of Technology, Uttarakhand}
+\date{2025}
+
+\begin{document}
+
+% ============== SLIDE 1: Title ==============
+\begin{frame}[plain]
+\titlepage
+\end{frame}
+
+% ============== SLIDE 2: Outline ==============
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+% ============== SECTION 1: Introduction ==============
+\section{Introduction}
+
+% ============== SLIDE 3: Motivation ==============
+\begin{frame}{Motivation}
+\begin{columns}
+\column{0.55\textwidth}
+\textbf{Global Energy Transition:}
+\begin{itemize}
+    \item Urgent need for decarbonization
+    \item Wind and solar PV are dominant renewable sources
+    \item Declining costs and technological maturity
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Key Challenges:}
+\begin{itemize}
+    \item Intermittency and variability
+    \item Reduced system inertia
+    \item Grid stability concerns
+    \item Power quality requirements
+\end{itemize}
+
+\column{0.45\textwidth}
+\begin{block}{Why Hybrid Systems?}
+\begin{itemize}
+    \item Complementary generation profiles
+    \item Improved power availability
+    \item Better resource utilization
+    \item Enhanced grid support
+\end{itemize}
+\end{block}
+\end{columns}
+\end{frame}
+
+% ============== SLIDE 4: Problem Statement ==============
+\begin{frame}{Problem Statement}
+\begin{alertblock}{Control Challenges in DFIG-PV Hybrid Systems}
+Integration of solar PV with DFIG wind turbines introduces:
+\begin{itemize}
+    \item \textbf{Tightly coupled nonlinear dynamics} between RSC, GSC, and PV
+    \item \textbf{Multi-timescale disturbances} (wind: seconds, solar: sub-seconds)
+    \item \textbf{Stringent grid code requirements} (THD $<$ 5\%, voltage $\pm$5\%)
+\end{itemize}
+\end{alertblock}
+
+\vspace{0.3cm}
+\begin{block}{Limitations of Conventional PI Control}
+\begin{itemize}
+    \item Requires accurate system models
+    \item Extensive parameter tuning needed
+    \item Performance degrades under varying conditions
+    \item Cannot handle multi-objective optimization
+\end{itemize}
+\end{block}
+\end{frame}
+
+% ============== SLIDE 5: Research Gap ==============
+\begin{frame}{Research Gap}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Existing DRL Applications:}
+\begin{itemize}
+    \item TD3 for PMSG wind turbines
+    \item DDPG for microgrid control
+    \item DRL for wind farm frequency regulation
+    \item Virtual inertia control
+\end{itemize}
+
+\column{0.5\textwidth}
+\begin{alertblock}{Identified Gap}
+No comprehensive study applies \textbf{TD3} to integrated \textbf{DFIG-Solar PV} hybrid systems with:
+\begin{itemize}
+    \item Direct DC-link coupling
+    \item Unified RSC-GSC-PV control
+    \item HIL experimental validation
+\end{itemize}
+\end{alertblock}
+\end{columns}
+
+\vspace{0.3cm}
+\begin{block}{Research Question}
+\textit{How can we design DRL-based control that optimally exploits hybrid DFIG-PV characteristics while maintaining grid stability?}
+\end{block}
+\end{frame}
+
+% ============== SECTION 2: Objectives ==============
+\section{Research Objectives}
+
+% ============== SLIDE 6: Objectives ==============
+\begin{frame}{Research Objectives}
+\textbf{Primary Objective:}\\
+Develop, implement, and experimentally validate DRL-based control strategies (DDPG and TD3) for solar PV-integrated DFIG wind energy systems.
+
+\vspace{0.4cm}
+\textbf{Specific Objectives:}
+\begin{enumerate}
+    \item \textbf{Algorithm Implementation:}
+    \begin{itemize}
+        \item Implement DDPG and TD3 for continuous converter control
+        \item Optimize neural network architectures
+        \item Develop curriculum learning strategies
+    \end{itemize}
+
+    \item \textbf{Performance Validation:}
+    \begin{itemize}
+        \item Conduct HIL experiments on OPAL-RT platform
+        \item Compare DRL with classical PI control
+    \end{itemize}
+
+    \item \textbf{Critical Analysis:}
+    \begin{itemize}
+        \item Comparative analysis of DDPG vs. TD3
+        \item Identify operating scenarios for each algorithm
+    \end{itemize}
+\end{enumerate}
+\end{frame}
+
+% ============== SECTION 3: System Configuration ==============
+\section{System Configuration}
+
+% ============== SLIDE 7: System Architecture ==============
+\begin{frame}{DFIG-Solar PV Hybrid System Architecture}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Key Components:}
+\begin{itemize}
+    \item DFIG wind turbine
+    \item Rotor Side Converter (RSC)
+    \item Grid Side Converter (GSC)
+    \item Solar PV array at DC link
+    \item DC link capacitor
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Advantages:}
+\begin{itemize}
+    \item Shared power electronics
+    \item 15-25\% cost reduction
+    \item 3-5\% efficiency improvement
+    \item Reduced component count
+\end{itemize}
+
+\column{0.5\textwidth}
+\begin{block}{Control Objectives}
+\begin{itemize}
+    \item \textbf{RSC:} Rotor current control, torque regulation, MPPT
+    \item \textbf{GSC:} DC-link voltage, grid power exchange
+    \item \textbf{PV:} Maximum power extraction
+\end{itemize}
+\end{block}
+
+\begin{alertblock}{Coupling Challenge}
+Disturbance in any subsystem propagates to others via shared DC-link dynamics
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+% ============== SECTION 4: Methodology ==============
+\section{Methodology}
+
+% ============== SLIDE 8: DRL Background ==============
+\begin{frame}{Deep Reinforcement Learning for Power Systems}
+\begin{columns}
+\column{0.55\textwidth}
+\textbf{Why DRL?}
+\begin{itemize}
+    \item Model-free learning
+    \item Handles nonlinear, coupled dynamics
+    \item Continuous action spaces
+    \item Adaptive behavior
+    \item No explicit system model required
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Actor-Critic Framework:}
+\begin{itemize}
+    \item \textbf{Actor:} Learns policy $\pi(s) \rightarrow a$
+    \item \textbf{Critic:} Evaluates Q-value $Q(s,a)$
+\end{itemize}
+
+\column{0.45\textwidth}
+\begin{block}{RL Formulation}
+\begin{itemize}
+    \item \textbf{State:} $V_{dc}$, $i_r$, $\omega_r$, $P_{pv}$
+    \item \textbf{Action:} Converter control signals
+    \item \textbf{Reward:} Multi-objective function
+\end{itemize}
+\end{block}
+
+\begin{equation*}
+r = -\alpha|V_{dc} - V_{ref}| - \beta|P - P_{ref}|
+\end{equation*}
+\end{columns}
+\end{frame}
+
+% ============== SLIDE 9: DDPG Algorithm ==============
+\begin{frame}{Deep Deterministic Policy Gradient (DDPG)}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Key Features:}
+\begin{itemize}
+    \item Off-policy actor-critic algorithm
+    \item Continuous action spaces
+    \item Experience replay buffer
+    \item Target networks for stability
+    \item Deterministic policy gradient
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Critic Update:}
+\begin{equation*}
+L = \mathbb{E}[(Q(s,a) - y)^2]
+\end{equation*}
+\begin{equation*}
+y = r + \gamma Q'(s', \pi'(s'))
+\end{equation*}
+
+\column{0.5\textwidth}
+\begin{alertblock}{DDPG Limitations}
+\begin{itemize}
+    \item Q-value overestimation bias
+    \item Training instability
+    \item Sensitivity to hyperparameters
+    \item Aggressive policy updates
+\end{itemize}
+\end{alertblock}
+
+\vspace{0.3cm}
+These limitations motivate the development of \textbf{TD3} algorithm.
+\end{columns}
+\end{frame}
+
+% ============== SLIDE 10: TD3 Algorithm ==============
+\begin{frame}{Twin-Delayed Deep Deterministic Policy Gradient (TD3)}
+\textbf{TD3 Innovations over DDPG:}
+
+\begin{columns}
+\column{0.33\textwidth}
+\begin{block}{1. Clipped Double Q-Learning}
+\begin{itemize}
+    \item Twin critic networks
+    \item Takes minimum Q-value
+    \item Mitigates overestimation
+\end{itemize}
+\begin{equation*}
+y = r + \gamma \min_{i=1,2} Q_i'
+\end{equation*}
+\end{block}
+
+\column{0.33\textwidth}
+\begin{block}{2. Delayed Policy Updates}
+\begin{itemize}
+    \item Update policy less frequently
+    \item Typically every 2 critic updates
+    \item Enhanced stability
+\end{itemize}
+\end{block}
+
+\column{0.33\textwidth}
+\begin{block}{3. Target Policy Smoothing}
+\begin{itemize}
+    \item Add noise to target actions
+    \item Regularization effect
+    \item Improved robustness
+\end{itemize}
+\begin{equation*}
+\tilde{a} = \pi'(s') + \epsilon
+\end{equation*}
+\end{block}
+\end{columns}
+
+\vspace{0.3cm}
+\begin{alertblock}{Result}
+More stable training, better convergence, and improved deployment performance
+\end{alertblock}
+\end{frame}
+
+% ============== SECTION 5: Experimental Setup ==============
+\section{Experimental Validation}
+
+% ============== SLIDE 11: HIL Setup ==============
+\begin{frame}{Hardware-in-the-Loop Experimental Setup}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{OPAL-RT OP4510 Platform:}
+\begin{itemize}
+    \item Real-time digital simulator
+    \item Sub-microsecond time steps
+    \item Industry-standard validation
+    \item Realistic power system dynamics
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Test Scenarios:}
+\begin{itemize}
+    \item Steady-state operation
+    \item Wind speed variations (10--11.5 m/s)
+    \item Solar irradiance steps (0--50 A)
+    \item Combined disturbances
+\end{itemize}
+
+\column{0.5\textwidth}
+\begin{block}{Experimental Runs}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Run} & \textbf{Objective} \\
+\hline
+Run 1 & DFIG baseline (no PV) \\
+Run 2 & With solar integration \\
+Run 3 & Comparative analysis \\
+Run 4 & Multi-scenario tests \\
+Run 5 & Combined disturbances \\
+\hline
+\end{tabular}
+\end{block}
+
+\vspace{0.2cm}
+Initial conditions: Wind = 9 m/s, steady-state
+\end{columns}
+\end{frame}
+
+% ============== SECTION 6: Results ==============
+\section{Results and Analysis}
+
+% ============== SLIDE 12: DC Link Voltage Results ==============
+\begin{frame}{DC Link Voltage Response}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Wind Speed Step (10 $\rightarrow$ 11.2 m/s):}
+
+\vspace{0.3cm}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{TD3} & \textbf{DDPG} & \textbf{PI} \\
+\midrule
+Peak Deviation & 12\% & 15\% & 18\% \\
+Rise Time (ms) & 12 & 13 & 15 \\
+Settling (ms) & 98 & 102 & 118 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\textbf{Key Findings:}
+\begin{itemize}
+    \item TD3: Fastest recovery
+    \item DDPG: Minor oscillations
+    \item PI: Largest overshoot
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Solar PV Step (0 $\rightarrow$ 5 A):}
+
+\vspace{0.3cm}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Controller} & \textbf{Regulation} & \textbf{Settling} \\
+\midrule
+TD3 & $\pm$4.6\% & $<$ 90 ms \\
+DDPG & $\pm$4.8\% & $\sim$ 100 ms \\
+PI & $\pm$5.0\% & $>$ 120 ms \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+TD3 maintains tightest voltage regulation under solar disturbances
+\end{columns}
+\end{frame}
+
+% ============== SLIDE 13: Rotor Current Results ==============
+\begin{frame}{Rotor Current Dynamic Response}
+\textbf{Simultaneous Wind + Solar Variations (Most Challenging Scenario):}
+
+\begin{columns}
+\column{0.5\textwidth}
+\begin{block}{Performance Comparison}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{TD3} & \textbf{DDPG} & \textbf{PI} \\
+\midrule
+Rise Time (ms) & 12 & 13 & 15 \\
+Settling (ms) & 34 & 36 & 40 \\
+Overshoot (\%) & 4.4 & 4.6 & 5.0 \\
+\bottomrule
+\end{tabular}
+\end{block}
+
+\vspace{0.2cm}
+\textbf{TD3 Advantages:}
+\begin{itemize}
+    \item Smoothest transient response
+    \item Optimal damping
+    \item No secondary oscillations
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Improvements:}
+
+\vspace{0.3cm}
+\textbf{TD3 vs PI:}
+\begin{itemize}
+    \item 20\% faster rise time
+    \item 15\% faster settling
+    \item 12\% lower overshoot
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{TD3 vs DDPG:}
+\begin{itemize}
+    \item 7.7\% faster rise time
+    \item 5.6\% faster settling
+    \item 4.3\% lower overshoot
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% ============== SLIDE 14: Overall Performance ==============
+\begin{frame}{Overall System Performance Comparison}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{TD3} & \textbf{DDPG} & \textbf{PI Control} \\
+\midrule
+Response Time (ms) & \textbf{72} & 80 & 85 \\
+Power Overshoot (\%) & \textbf{7.0} & 7.2 & 7.8 \\
+DC Link Voltage Regulation & \textbf{$\pm$4.6\%} & $\pm$4.8\% & $\pm$5\% \\
+Settling Time (ms) & \textbf{98} & 102 & 118 \\
+Power Factor & 0.97--0.99 & 0.97--0.99 & 0.95--0.98 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\begin{columns}
+\column{0.5\textwidth}
+\begin{block}{TD3 vs PI Control}
+\begin{itemize}
+    \item 15.3\% faster response
+    \item 10.3\% lower overshoot
+    \item 16.9\% faster settling
+\end{itemize}
+\end{block}
+
+\column{0.5\textwidth}
+\begin{block}{TD3 vs DDPG}
+\begin{itemize}
+    \item 10\% faster response
+    \item 4.2\% tighter regulation
+    \item More stable training
+\end{itemize}
+\end{block}
+\end{columns}
+\end{frame}
+
+% ============== SLIDE 15: Solar Integration Benefits ==============
+\begin{frame}{Solar PV Integration Benefits}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Grid Power Transformation:}
+
+\vspace{0.3cm}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Parameter} & \textbf{No Solar} & \textbf{With Solar} \\
+\hline
+$I_{solar}$ & 0 A & 50 A \\
+$P_{solar}$ & 0 kW & 11.5 kW \\
+$P_{grid}$ & -8 to -5 kW & +3 to +6 kW \\
+\hline
+\end{tabular}
+
+\vspace{0.3cm}
+Negative-to-positive transition indicates transformation from \textbf{grid import} to \textbf{grid export} mode.
+
+\column{0.5\textwidth}
+\textbf{DC Link Voltage Improvement:}
+
+\vspace{0.3cm}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Controller} & \textbf{Run 1} & \textbf{Run 2} \\
+\hline
+PI & $\pm$5.0\% & $\pm$4.2\% \\
+DDPG & $\pm$4.8\% & $\pm$4.0\% \\
+TD3 & $\pm$4.6\% & $\pm$3.8\% \\
+\hline
+\end{tabular}
+
+\vspace{0.3cm}
+Solar PV contributes to DC link stability (16-17\% improvement).
+\end{columns}
+\end{frame}
+
+% ============== SECTION 7: Contributions ==============
+\section{Contributions}
+
+% ============== SLIDE 16: Major Contributions ==============
+\begin{frame}{Major Contributions}
+\begin{enumerate}
+    \item \textbf{First TD3 Application to DFIG-PV Hybrid Systems}
+    \begin{itemize}
+        \item Novel application of TD3 to integrated solar PV-DFIG systems
+        \item Addresses unique coupling dynamics in hybrid configurations
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \item \textbf{Comprehensive DDPG-TD3 Comparison}
+    \begin{itemize}
+        \item Identical test conditions for fair evaluation
+        \item Quantified performance improvements
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \item \textbf{Unified Controller Design}
+    \begin{itemize}
+        \item Single DRL framework for RSC, GSC, and PV coordination
+        \item Multi-objective reward function
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \item \textbf{HIL Experimental Validation}
+    \begin{itemize}
+        \item OPAL-RT OP4510 real-time validation
+        \item Demonstrates industrial deployment feasibility
+    \end{itemize}
+\end{enumerate}
+\end{frame}
+
+% ============== SLIDE 17: Publications ==============
+\begin{frame}{Publications}
+\textbf{Journal Publications:}
+\begin{enumerate}
+    \item R. Pandey, S. Bose, and P. Dwivedi, ``DDPG algorithm for power optimization and control of solar PV-integrated DFIG wind energy systems,'' \textit{Scientific Reports}, vol. 15, Article 39212, 2025. \textbf{(Published)}
+
+    \vspace{0.3cm}
+    \item R. Pandey et al., ``Twin-delayed deep deterministic policy gradient for enhanced power optimization in solar PV-integrated DFIG wind energy systems,'' \textit{Scientific Reports}, 2025. \textbf{(Under Review)}
+\end{enumerate}
+
+\vspace{0.4cm}
+\textbf{Conference Publication:}
+\begin{enumerate}
+    \item R. Pandey, S. Bose, P. Dwivedi, and S. Negi, ``Real-time performance investigation of a solar PV integrated DFIG system,'' in \textit{Proc. IEEE PIICON}, New Delhi, India, Nov. 2022.
+\end{enumerate}
+\end{frame}
+
+% ============== SECTION 8: Conclusion ==============
+\section{Conclusion}
+
+% ============== SLIDE 18: Conclusion ==============
+\begin{frame}{Conclusion}
+\begin{block}{Key Findings}
+\begin{itemize}
+    \item TD3 achieves \textbf{15\% faster response} and \textbf{17\% faster settling} than PI
+    \item Both DRL controllers outperform classical PI control
+    \item TD3 provides more \textbf{stable training} and \textbf{balanced performance}
+    \item Solar PV integration improves DC-link stability by 16-17\%
+    \item HIL validation confirms practical deployment viability
+\end{itemize}
+\end{block}
+
+\vspace{0.3cm}
+\begin{block}{Trade-offs}
+\begin{itemize}
+    \item TD3 has higher training complexity but better deployment reliability
+    \item DDPG shows aggressive optimization, TD3 offers balanced multi-objective performance
+    \item Model-free nature enables adaptive control without accurate system models
+\end{itemize}
+\end{block}
+\end{frame}
+
+% ============== SLIDE 19: Future Scope ==============
+\begin{frame}{Future Scope}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Algorithm Enhancements:}
+\begin{itemize}
+    \item Multi-agent DRL for wind farms
+    \item Physics-informed neural networks
+    \item Transfer learning across conditions
+    \item Fault ride-through capability
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{System Extensions:}
+\begin{itemize}
+    \item Battery energy storage integration
+    \item Grid fault response
+    \item Microgrid coordination
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Deployment Considerations:}
+\begin{itemize}
+    \item Embedded implementation
+    \item Real-time computational optimization
+    \item Field testing and validation
+    \item Safety-constrained learning
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Scalability:}
+\begin{itemize}
+    \item Large-scale wind-solar farms
+    \item Grid-level coordination
+    \item Market participation
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% ============== SLIDE 20: Thank You ==============
+\begin{frame}[plain]
+\begin{center}
+\vspace{2cm}
+{\Huge\textbf{Thank You}}
+
+\vspace{1cm}
+{\Large Questions?}
+
+\vspace{1.5cm}
+{\large Ruchir Pandey}\\
+{\small Department of Electrical Engineering}\\
+{\small National Institute of Technology, Uttarakhand}
+
+\vspace{0.5cm}
+{\small Supervisor: Dr. Shantanu Bose}
+\end{center}
+\end{frame}
+
+\end{document}
