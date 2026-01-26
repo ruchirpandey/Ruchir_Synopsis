@@ -21,11 +21,11 @@
 \setbeamercolor{block title}{fg=white,bg=nitblue}
 
 % Title information
-\title[TD3 for DFIG-PV Systems]{Twin-Delayed Deep Deterministic Policy Gradient for Enhanced Power Optimization in Solar PV-Integrated DFIG Wind Energy Systems}
+\title[DFIG-Solar PV Hybrid System]{DFIG-Solar PV Interconnected Hybrid Energy Generation System}
 \subtitle{Ph.D. Synopsis Presentation}
-\author[Ruchir Pandey]{Ruchir Pandey\\[0.3cm]{\small Supervisor: Dr. Shantanu Bose}}
+\author[Ruchir Pandey]{Ruchir Pandey\\[0.3cm]{\small Supervisor: Dr. Sourav Bose}}
 \institute[NIT Uttarakhand]{Department of Electrical Engineering\\National Institute of Technology, Uttarakhand}
-\date{2025}
+\date{2026}
 
 \begin{document}
 
@@ -118,11 +118,6 @@ No comprehensive study applies \textbf{TD3} to integrated \textbf{DFIG-Solar PV}
 \end{itemize}
 \end{alertblock}
 \end{columns}
-
-\vspace{0.3cm}
-\begin{block}{Research Question}
-\textit{How can we design DRL-based control that optimally exploits hybrid DFIG-PV characteristics while maintaining grid stability?}
-\end{block}
 \end{frame}
 
 % ============== SECTION 2: Objectives ==============
@@ -152,7 +147,6 @@ Develop, implement, and experimentally validate DRL-based control strategies (DD
     \item \textbf{Critical Analysis:}
     \begin{itemize}
         \item Comparative analysis of DDPG vs. TD3
-        \item Identify operating scenarios for each algorithm
     \end{itemize}
 \end{enumerate}
 \end{frame}
@@ -177,9 +171,8 @@ Develop, implement, and experimentally validate DRL-based control strategies (DD
 \textbf{Advantages:}
 \begin{itemize}
     \item Shared power electronics
-    \item 15-25\% cost reduction
-    \item 3-5\% efficiency improvement
     \item Reduced component count
+    \item Eliminates separate DC-DC converter for PV
 \end{itemize}
 
 \column{0.5\textwidth}
@@ -190,10 +183,6 @@ Develop, implement, and experimentally validate DRL-based control strategies (DD
     \item \textbf{PV:} Maximum power extraction
 \end{itemize}
 \end{block}
-
-\begin{alertblock}{Coupling Challenge}
-Disturbance in any subsystem propagates to others via shared DC-link dynamics
-\end{alertblock}
 \end{columns}
 \end{frame}
 
@@ -663,7 +652,7 @@ Solar PV contributes to DC link stability (16-17\% improvement).
 {\small National Institute of Technology, Uttarakhand}
 
 \vspace{0.5cm}
-{\small Supervisor: Dr. Shantanu Bose}
+{\small Supervisor: Dr. Sourav Bose}
 \end{center}
 \end{frame}
 
