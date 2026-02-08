@@ -1,80 +1,24 @@
 
+\section{Introduction}
 
-\section{Reinforcement Learning Framework}
+This chapter presents the implementation of DDPG \cite{Lillicrap2015} and TD3 \cite{Fujimoto2018} algorithms for unified control of the hybrid DFIG-Solar PV system. The theoretical foundations of deep reinforcement learning---including the MDP formulation, policy gradient methods, actor-critic architecture, experience replay, and target networks---are detailed in Chapter~\ref{chap:rl}. Here, the focus is on the proposed control framework design and algorithm-specific implementation decisions.
 
-\subsection{Agent-Environment Interaction}
-
-Reinforcement Learning (RL) formalizes the problem of learning optimal behavior through trial-and-error interaction with an environment (Figure~\ref{fig:rl_framework}).
+The RL agent-environment interaction for the DFIG-PV system is illustrated in Figure~\ref{fig:rl_framework}, where the agent (DDPG or TD3 controller) observes system states and outputs converter voltage references, receiving reward feedback based on power tracking and voltage regulation performance.
 
 \begin{figure}[htbp]
     \centering
     \begin{tikzpicture}[node distance=3cm, auto]
         \node [draw, rectangle, minimum width=2cm, minimum height=1cm] (agent) {Agent};
         \node [draw, rectangle, minimum width=2cm, minimum height=1cm, right of=agent, node distance=5cm] (env) {Environment};
-        
+
         \draw[->, thick] (agent) -- node[above] {action $a_t$} (env);
         \draw[->, thick] (env) to [bend right=45] node[below] {state $s_t$, reward $r_t$} (agent);
     \end{tikzpicture}
-    \caption{Agent-environment interaction in reinforcement learning}
+    \caption{Agent-environment interaction in reinforcement learning for DFIG-PV control}
     \label{fig:rl_framework}
 \end{figure}
 
-The framework consists of several key components. The \textbf{Agent} is the controller implemented using DDPG or TD3 neural networks, while the \textbf{Environment} is the hybrid DFIG-PV power system being controlled. The \textbf{State $s_t$} represents system measurements at time $t$, and the \textbf{Action $a_t$} comprises control voltages applied to converters. The \textbf{Reward $r_t$} is a scalar feedback signal indicating performance, and the \textbf{Policy $\pi$} defines the mapping from states to actions.
-
-\subsection{Markov Decision Process (MDP)}
-
-The RL problem is formally defined as a Markov Decision Process:
-
-\begin{definition}[Markov Decision Process]
-An MDP is a tuple $\mathcal{M} = (\mathcal{S}, \mathcal{A}, P, R, \gamma)$ where:
-\begin{itemize}
-    \item $\mathcal{S}$ is the state space
-    \item $\mathcal{A}$ is the action space
-    \item $P(s_{t+1}|s_t, a_t)$ is the state transition probability
-    \item $R(s_t, a_t)$ is the reward function
-    \item $\gamma \in [0,1]$ is the discount factor
-\end{itemize}
-\end{definition}
-
-\textbf{Markov Property:}
-\begin{equation}
-P(s_{t+1}|s_t, a_t, s_{t-1}, a_{t-1}, \ldots, s_0, a_0) = P(s_{t+1}|s_t, a_t)
-\end{equation}
-
-\subsection{Policy and Value Functions}
-
-\subsubsection{Policy}
-
-A policy $\pi$ defines the agent's behavior. For deterministic policies (used in DDPG and TD3):
-\begin{equation}
-a = \pi(s)
-\end{equation}
-
-The goal is to find the optimal policy:
-\begin{equation}
-\pi^* = \argmax_\pi \EE\left[\sum_{t=0}^{\infty} \gamma^t r_t \Big| \pi\right]
-\end{equation}
-
-\subsubsection{Value Functions}
-
-\begin{definition}[Action-Value Function]
-The Q-function is the expected return starting from state $s$, taking action $a$:
-\begin{equation}
-Q^\pi(s,a) = \EE_\pi\left[\sum_{k=0}^{\infty} \gamma^k r_{t+k} \Big| s_t = s, a_t = a\right]
-\end{equation}
-\end{definition}
-
-\subsection{Bellman Equation}
-
-The Q-function satisfies the Bellman optimality equation:
-\begin{equation}
-Q^*(s,a) = \EE_{s'}\left[r + \gamma \max_{a'} Q^*(s',a')\right]
-\label{eq:bellman}
-\end{equation}
-
-\subsection{Actor-Critic Architecture}
-
-Actor-critic methods combine two components: the \textbf{Actor} learns the policy $\pi_\theta(s)$ parameterized by $\theta$, while the \textbf{Critic} learns the value function $Q_\phi(s,a)$ parameterized by $\phi$ (Figure~\ref{fig:actor_critic_general}).
+The actor-critic architecture (Figure~\ref{fig:actor_critic_general}) forms the basis for both algorithms, where the actor network learns the deterministic control policy $\mu_\theta(s)$ and the critic network(s) evaluate action quality via the Q-function $Q_\phi(s,a)$.
 
 \begin{figure}[htbp]
     \centering
@@ -82,39 +26,6 @@ Actor-critic methods combine two components: the \textbf{Actor} learns the polic
     \caption{General actor-critic architecture showing the interaction between policy network (actor) and value network (critic) in reinforcement learning-based control}
     \label{fig:actor_critic_general}
 \end{figure}
-
-\subsubsection{Deterministic Policy Gradient}
-
-For deterministic policies $a = \mu_\theta(s)$, the policy gradient is:
-\begin{equation}
-\nabla_\theta J(\theta) = \EE_{s \sim \rho^\mu}\left[\nabla_\theta \mu_\theta(s) \nabla_a Q(s,a)|_{a=\mu_\theta(s)}\right]
-\label{eq:dpg}
-\end{equation}
-
-This is the foundation of DDPG and TD3 \cite{Fathollahi2024,Yakout2025}. Recent applications of deep deterministic policy gradient methods in power systems have demonstrated superior performance compared to traditional control approaches, particularly for adaptive voltage regulation and transient stability enhancement in grid-connected renewable energy systems.
-
-\subsection{Experience Replay}
-
-Experience replay stores transitions in a buffer $\mathcal{B}$:
-\begin{equation}
-\mathcal{B} = \{(s_t, a_t, r_t, s_{t+1})\}_{t=1:T}
-\end{equation}
-
-Training uses random minibatches to break temporal correlations and improve sample efficiency.
-
-\subsection{Target Networks}
-
-Target networks provide stable regression targets. Separate target networks with parameters $\theta'$ and $\phi'$ are slowly updated:
-\begin{align}
-\theta' &\leftarrow \tau \theta + (1-\tau)\theta' \\
-\phi' &\leftarrow \tau \phi + (1-\tau)\phi'
-\end{align}
-where $\tau \ll 1$ (typically 0.001).
-
-Target Q-value:
-\begin{equation}
-y_t = r_t + \gamma Q_{\phi'}(s_{t+1}, \mu_{\theta'}(s_{t+1}))
-\end{equation}
 
 \section{Proposed Unified Control Framework}
 \label{sec:unified_framework}
@@ -251,6 +162,28 @@ Evaluates state-action pairs: $Q(s,a|\theta_Q) = W'_n\sigma(W'_{n-1} \cdots \sig
 
 \textbf{Architecture:} [15]-[400]-[300]-[1] with ReLU hidden, linear output. Parameters: $N_{params,critic} = 126,701$. DDPG uses 1 critic, TD3 uses 2 (Section~\ref{subsec:td3_critics}).
 
+\subsubsection{Weight Initialization}
+
+All hidden layers use He (Kaiming) initialization \cite{Lillicrap2015}: weights drawn from $\mathcal{U}(-\frac{1}{\sqrt{f_{in}}}, \frac{1}{\sqrt{f_{in}}})$ where $f_{in}$ is the fan-in of each layer. The actor output layer uses a uniform initialization from $\mathcal{U}(-3 \times 10^{-3}, 3 \times 10^{-3})$ to ensure initial actions are near zero, preventing large initial control signals that could destabilize the power system during early training episodes.
+
+\subsubsection{State Normalization}
+
+The 11 state components span different physical scales (currents: 0--50 A, voltages: 0--800 V, powers: 0--10 kW, angle: 0--$2\pi$ rad). Without normalization, high-magnitude features dominate gradient updates, degrading learning. Min-max normalization is applied:
+\begin{equation}
+\hat{s}_i = \frac{s_i - s_{i,\min}}{s_{i,\max} - s_{i,\min}} \in [0, 1]
+\label{eq:state_normalization}
+\end{equation}
+where $s_{i,\min}$ and $s_{i,\max}$ are the expected operating ranges for each state variable, determined from the system rated parameters. Running statistics are updated during training to adapt to encountered state distributions. No batch normalization is used within the network layers, as recent studies show batch normalization suffers from non-stationarity under RL exploration; the min-max input normalization provides sufficient conditioning.
+
+\subsubsection{Gradient Clipping}
+
+To prevent training instability from large gradient magnitudes---particularly during early training when reward signals are noisy---L2 norm gradient clipping is applied to both actor and critic networks:
+\begin{equation}
+\hat{g} = \frac{g}{\max(1, \|g\|_2 / g_{\max})}
+\label{eq:gradient_clipping}
+\end{equation}
+where $g_{\max} = 1.0$ for critic networks and $g_{\max} = 0.5$ for the actor network. The more conservative actor clipping prevents aggressive policy updates from destabilizing the learned control strategy.
+
 \subsection{Training Infrastructure}
 \label{subsec:training_infrastructure}
 
@@ -282,9 +215,17 @@ where $\tau \ll 1$ prevents rapid target changes.
 
 Gradual task difficulty increase: \textbf{Phase 1 (Eps 1--100):} Random exploration, buffer population. \textbf{Phase 2 (101--500):} DC link voltage only ($r = -(v_{dc} - v_{dc}^*)^2$). \textbf{Phase 3 (501--1000):} DC link + RSC power ($r = r_{RSC} + r_{GSC,voltage}$). \textbf{Phase 4 (1001+):} Full multi-objective (Eq.~\ref{eq:total_reward}). Essential for convergence.
 
+\subsubsection{Reproducibility Protocol}
+
+All experiments are conducted over 5 independent training runs with different random seeds (seeds 0--4) for network initialization, replay buffer sampling, and exploration noise generation. Results are reported as mean $\pm$ standard deviation across these runs. The simulation environment is deterministic given the same seed, ensuring reproducibility. Model checkpoints are saved every 100 episodes, and the best-performing checkpoint (highest validation reward) is selected for HIL deployment.
+
+\subsubsection{Emergency Fallback Strategy}
+
+During both training and HIL deployment, a safety monitor continuously checks the DRL controller outputs against physical constraints. If any action violates converter voltage limits ($|v| > v_{max}$), DC link voltage deviates beyond $\pm$10\% of nominal, or the reward drops below a critical threshold for 10 consecutive steps, control is immediately transferred to a conventional PI controller with pre-tuned gains. This fallback mechanism ensures system safety during RL exploration and provides a fail-safe for unexpected operating conditions during deployment.
+
 \subsection{Summary of Common Elements}
 
-These elements---state/action spaces, dynamics, reward, networks, infrastructure---form the unified foundation for DDPG and TD3.
+These elements---state/action spaces, dynamics, reward, networks, infrastructure, normalization, and safety mechanisms---form the unified foundation for DDPG and TD3.
 
 
 % ------------------------------------------------------------
@@ -408,7 +349,7 @@ The complete DDPG training procedure follows these steps:
 
 \textbf{Exploration:} Minimum noise 0.1, decay factor 0.995 per episode.
 
-\textbf{Convergence:} Policy stable within 0.5\% for 100 consecutive episodes. Total training time ≈8 hours.
+\textbf{Convergence:} Same criterion as Eq.~\ref{eq:convergence_criterion} with 100 consecutive episodes (less stringent than TD3). Total training time $\approx$8 hours.
 
 \subsubsection{DDPG Implementation Summary}
 \label{subsec:ddpg_summary}
@@ -429,106 +370,10 @@ Solid baseline for DFIG-PV control. Key characteristics:
 
 TD3 implementation \cite{Pandey2025TD3} addresses DDPG limitations via three innovations.
 
-\subsubsection{Motivation: DDPG Limitations}
+\subsubsection{TD3 Innovations Applied to DFIG-PV Control}
 \label{subsec:td3_motivation}
 
-\subsubsection{Overestimation Bias}
-
-DDPG's single critic prone to bias: $E[Q_\phi(s,a)] \geq Q^{\pi}(s,a)$. Causes:
-\begin{enumerate}
-    \item Function approximator errors
-    \item The max operation in Q-learning amplifies positive errors
-    \item The policy exploits these optimistic estimates
-\end{enumerate}
-
-\textbf{Consequences for Power System Control:}
-
-This overestimation bias has significant ramifications for power system control. The actor tends to select overly aggressive control actions based on optimistically biased value estimates, which results in power overshoot and oscillations. The DC link voltage becomes less stable due to these aggressive control commands, creating a risk of component stress and potential damage to the power electronic converters. Collectively, these effects degrade overall system performance and reliability.
-
-\subsubsection{Policy-Value Coupling}
-
-In DDPG, the actor and critic are updated at every timestep, creating tight coupling between policy and value estimates. When the critic's estimates are still inaccurate (early in training or during environment changes), rapid policy updates can lead to the policy converging to local optima, brittle behavior that is highly sensitive to hyperparameters, and instability during online adaptation to changing operating conditions.
-
-These limitations are particularly problematic for safety-critical power system applications where control stability is paramount.
-
-\subsubsection{TD3 Algorithmic Innovations}
-\label{subsec:td3_innovations}
-
-TD3 introduces three key mechanisms to address DDPG's limitations while maintaining its advantages for continuous control.
-
-\subsubsection{Innovation 1: Clipped Double Q-Learning}
-\label{subsubsec:clipped_double_q}
-
-TD3 employs two independent critic networks $Q_{\phi_1}(s,a)$ and $Q_{\phi_2}(s,a)$ and uses the minimum of their estimates for computing target values:
-
-\begin{equation}
-y = r + \gamma \min_{i=1,2} Q'_{\phi_i}(s', \tilde{a}')
-\label{eq:clipped_double_q}
-\end{equation}
-
-\textbf{Theoretical Justification:}
-
-If both critics independently overestimate:
-\begin{align}
-Q_{\phi_1}(s,a) &\geq Q^{\pi}(s,a) + \epsilon_1 \\
-Q_{\phi_2}(s,a) &\geq Q^{\pi}(s,a) + \epsilon_2
-\end{align}
-
-Then:
-\begin{equation}
-\min(Q_{\phi_1}, Q_{\phi_2}) \approx Q^{\pi}(s,a) + \min(\epsilon_1, \epsilon_2)
-\end{equation}
-
-Since independent errors are unlikely to be large simultaneously, $\min(\epsilon_1, \epsilon_2) < \max(\epsilon_1, \epsilon_2)$, producing a more conservative (and reliable) estimate.
-
-\textbf{Benefit for Power System Control:}
-
-This clipped double Q-learning mechanism provides substantial benefits for power system control, yielding more conservative value estimates that guide the actor to select safer and less aggressive actions. Consequently, power overshoot is reduced and DC link voltage stability is significantly improved compared to standard DDPG.
-
-\subsubsection{Innovation 2: Target Policy Smoothing}
-\label{subsubsec:target_smoothing}
-
-TD3 adds clipped noise to the target action before computing target Q-values:
-
-\begin{equation}
-\tilde{a}' = \text{clip}\left(\mu'(s'|\theta'_\mu) + \text{clip}(\epsilon, -c, c), a_{low}, a_{high}\right)
-\label{eq:target_smoothing}
-\end{equation}
-
-where $\epsilon \sim \mathcal{N}(0, \sigma)$ is Gaussian noise.
-
-\textbf{Rationale:}
-
-This noise injection acts as a regularization technique that smooths the value landscape by considering actions near the policy output, prevents the actor from exploiting narrow and brittle peaks in the Q-function, and encourages learning robust policies that generalize well to nearby state-action regions.
-
-\textbf{Hyperparameters:}
-
-The target policy smoothing employs a noise standard deviation of $\sigma = 0.2$ and clips the noise to a range of $c = 0.5$.
-
-The inner clip constrains noise magnitude to $[-c, c]$, while the outer clip ensures the final action remains within valid physical bounds $[a_{low}, a_{high}]$.
-
-\subsubsection{Innovation 3: Delayed Policy Updates}
-\label{subsubsec:delayed_updates}
-
-TD3 updates the actor network and target networks less frequently than the critic networks:
-
-\begin{equation}
-\text{Update policy and targets only every } d \text{ critic updates}
-\label{eq:delayed_updates}
-\end{equation}
-
-\textbf{Procedure:}
-\begin{enumerate}
-    \item Update both critics at every timestep
-    \item Update actor only every $d$ timesteps (typically $d=2$)
-    \item Update target networks only when actor is updated
-\end{enumerate}
-
-\textbf{Benefit:}
-
-This decoupling strategy allows the critics to converge toward more accurate value estimates before the policy adjusts, reduces variance in policy gradient estimates, enables more stable learning overall, and decreases sensitivity to critic approximation errors.
-
-By waiting for the critics to provide better guidance, the actor avoids premature convergence based on noisy value estimates.
+As detailed in Chapter~\ref{chap:rl}, TD3 addresses DDPG's overestimation bias, policy-value coupling, and hyperparameter sensitivity through three innovations: clipped double Q-learning, target policy smoothing, and delayed policy updates. This section focuses on the implementation-specific details for the DFIG-PV system.
 
 \subsubsection{Twin Critic Architecture}
 \label{subsec:td3_critics}
@@ -637,7 +482,14 @@ The complete TD3 training procedure follows these steps:
 
 \textbf{Curriculum:} Warmup (episodes 1--100), simplified task (101--300), intermediate (301--800), full multi-objective (801--2500).
 
-\textbf{Convergence:} Policy stable within 0.5\% for 200 consecutive episodes, achieved around episode 2000. Total training time ≈12 hours.
+\textbf{Exploration Decay:} TD3 uses Gaussian exploration noise with linear decay: $\sigma_{explore}(e) = \max(0.01, \sigma_0 - e \times \Delta\sigma)$, where $\sigma_0 = 0.1$ and $\Delta\sigma = 4 \times 10^{-5}$ per episode, reaching minimum noise at approximately episode 2250.
+
+\textbf{Convergence Criterion:} Training is considered converged when the 100-episode moving average of the total reward $\bar{R}_{100}$ satisfies:
+\begin{equation}
+\frac{|\bar{R}_{100}(e) - \bar{R}_{100}(e-100)|}{\max(|\bar{R}_{100}(e)|, 1)} < 0.005
+\label{eq:convergence_criterion}
+\end{equation}
+for 200 consecutive episodes, indicating less than 0.5\% relative change in expected return. Convergence achieved around episode 2000. Total training time $\approx$12 hours.
 
 \subsubsection{TD3 Implementation Summary}
 \label{subsec:td3_summary}
@@ -652,6 +504,21 @@ The TD3 implementation offers significant advantages including reduced overestim
 
 However, TD3 requires 50\% more training (12h vs 8h), double critic parameters (253K vs 127K), slightly complex implementation, additional hyperparameters ($d$, $\tilde{\sigma}$, $c$). Performance improvements justify adoption for safety-critical applications.
 
+
+\subsection{TD3 Ablation Study Methodology}
+\label{subsec:ablation_methodology}
+
+To quantify the individual contribution of each TD3 innovation to DFIG-PV control performance, an ablation study is conducted with the following configurations:
+
+\begin{enumerate}
+    \item \textbf{DDPG (Baseline):} Single critic, no delayed updates, no target smoothing
+    \item \textbf{DDPG + Twin Critics (TC):} Add clipped double Q-learning only---isolates the effect of overestimation bias reduction on DC link voltage stability and power tracking
+    \item \textbf{DDPG + Delayed Updates (DU):} Add delayed policy updates ($d=2$) only---isolates the effect of policy-value decoupling on training stability
+    \item \textbf{DDPG + Target Smoothing (TS):} Add target policy smoothing ($\sigma=0.2$, $c=0.5$) only---isolates the effect of value function regularization on generalization
+    \item \textbf{Full TD3 (TC + DU + TS):} All three innovations combined
+\end{enumerate}
+
+Each configuration is trained for 2500 episodes over 5 random seeds using identical hyperparameters (except for the ablated component). Evaluation metrics include: mean episode reward, DC link voltage regulation error ($\Delta v_{dc}$), active/reactive power tracking RMSE, overestimation bias ($\mathbb{E}[Q_\phi - Q^\pi]$ estimated via Monte Carlo rollouts), and convergence speed (episodes to reach 90\% of final performance). Results are presented in Chapter~\ref{chap:td3}.
 
 % ------------------------------------------------------------
 % SECTION 5.4: IMPLEMENTATION COMPARISON
