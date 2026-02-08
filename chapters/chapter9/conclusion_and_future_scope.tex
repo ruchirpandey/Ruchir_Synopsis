@@ -446,9 +446,7 @@ TD3 achieves measurable improvements over DDPG that validate its algorithmic inn
 \subsection{Theoretical Insights}
 \label{subsec:theoretical_insights_summary}
 
-The performance improvements have been rigorously linked to specific algorithmic features:
-
-The performance improvements observed in this chapter have been rigorously linked to specific algorithmic features that provide theoretical foundations for the empirical results.
+The performance improvements have been rigorously linked to specific algorithmic features that provide theoretical foundations for the empirical results.
 
 TD3's clipped double Q-learning mechanism (Equation~\ref{eq:clipped_double_q}) addresses a fundamental limitation of single-critic actor-critic methods by mitigating the overestimation bias inherent in DDPG's value function approximation. This innovation produces conservative and reliable value estimates that guide policy learning toward robust rather than overly aggressive actions. The conservative bias prevents the aggressive control actions that would otherwise cause overshoots and instability, directly explaining TD3's superior transient response characteristics.
 
@@ -475,7 +473,7 @@ The results presented in this chapter validate the unified deep reinforcement le
 \section{Critical Discussion}
 \label{sec:critical_discussion}
 
-This section presents a critical discussion of the comparative performance, practical implications, and implementation considerations of the Deep Deterministic Policy Gradient (DDPG) and Twin-Delayed Deep Deterministic Policy Gradient (TD3) control methodologies for solar PV-integrated DFIG wind energy systems. The analysis builds upon the unified methodology presented in Chapter 4 and the experimental validation and performance evaluation from Chapter 5, to provide practical guidance for researchers and practitioners implementing deep reinforcement learning control in renewable energy systems.
+This section presents a critical discussion of the comparative performance, practical implications, and implementation considerations of the Deep Deterministic Policy Gradient (DDPG) and Twin-Delayed Deep Deterministic Policy Gradient (TD3) control methodologies for solar PV-integrated DFIG wind energy systems. The analysis builds upon the unified methodology presented in Chapter~\ref{chap:ddpg} and the experimental validation and performance evaluation from Chapter~\ref{chap:td3}, to provide practical guidance for researchers and practitioners implementing deep reinforcement learning control in renewable energy systems.
 
 The comparative analysis reveals significant insights into the training-deployment trade-offs, performance characteristics, and practical applicability of both algorithms. While TD3 requires additional computational resources during training, both algorithms demonstrate identical deployment costs with distinct performance profiles that suit different application scenarios. This discussion is informed by recent systematic reviews of reinforcement learning-based control for microgrids \cite{Waghmare2025} and comprehensive analyses of artificial intelligence applications in renewable energy systems \cite{Ejiyi2025,AbdulMajeed2025}, which provide critical context for evaluating DRL algorithms (DDPG, TD3, SAC) against traditional control approaches and identify emerging trends in AI-driven energy optimization.
 
@@ -653,7 +651,7 @@ Critical hyperparameters: actor/critic learning rates, discount factor, target u
 \textbf{Approaches:} Start from published values, grid/random search, curriculum learning, automated optimization tools (Optuna, Ray Tune, Bayesian). TD3 exhibits lower sensitivity than DDPG.
 
 \subsection{Generalization Challenges}
-\label{subsec:generalization}
+\label{subsec:generalization_challenges}
 
 Policies trained for specific configurations may not transfer to different turbines/conditions. Performance degrades as components age.
 
