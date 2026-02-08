@@ -10,6 +10,7 @@
 \usepackage{titlesec}
 \usepackage{titling}
 \usepackage{tocloft}
+\usepackage{booktabs}
 \setlength{\cfttabnumwidth}{3em}    
 \usepackage{xcolor}
 \usepackage{polyglossia}
@@ -17,9 +18,7 @@
 \setotherlanguage{hindi}
 \usepackage{fancyhdr}
 \newfontfamily\bookmanfont{URW Bookman}
-\usepackage{booktabs}
-\setlength{\cftfignumwidth}{3.5em}
-\setlength{\cftfigindent}{0em}
+
 \newfontfamily\hindifont[Script=Devanagari]{Noto Sans Devanagari}
 \newfontfamily\hindifontsf[Script=Devanagari]{Noto Sans Devanagari}
 \newfontfamily\hindifonttt[Script=Devanagari]{Noto Sans Devanagari}
@@ -100,6 +99,8 @@
   \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Table of Contents}}}}
 \fancyfoot[C]{\textcolor{wordfade}\thepage}
 }
+\setlength{\cftfignumwidth}{3.5em} 
+\setlength{\cftfigindent}{0em}
 
 \fancypagestyle{listoffigures}{
   \fancyhf{}
@@ -133,7 +134,7 @@
 \fancypagestyle{chapterA1}{
   \fancyhf{}
   \renewcommand{\headrulewidth}{0.1pt}
-  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.1: Introduction and Overview}}}}
+  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.1: Introduction}}}}
   \fancyfoot[C]{\textcolor{wordfade}\thepage} 
 }
 
@@ -153,28 +154,28 @@
 
 \fancypagestyle{chapterA3}{
   \fancyhf{}
-  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.3: Control Strategies}}}}
+  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.3: Background and Motivation}}}}
   \fancyfoot[C]{\textcolor{wordfade}\thepage} 
   \renewcommand{\headrulewidth}{0.4pt} 
 }
 
 \fancypagestyle{chapterA4}{
   \fancyhf{}
-  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.4: Modelling and Simulation}}}}
+  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.4: Objectives}}}}
   \fancyfoot[C]{\thepage}
   \renewcommand{\headrulewidth}{0.4pt}
 }
 
 \fancypagestyle{chapterA5}{
   \fancyhf{}
-  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.5: Experimental Validation Framework}}}}
+  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.5: Thesis Organization}}}}
   \fancyfoot[C]{\textcolor{wordfade}\thepage}
   \renewcommand{\headrulewidth}{0.4pt} 
 }
 
 \fancypagestyle{chapterA6}{
   \fancyhf{}
-  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.6: Performance Evaluation and Results}}}}
+  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Chapter A.6: Major Contributions}}}}
   \fancyfoot[C]{\textcolor{wordfade}\thepage}
   \renewcommand{\headrulewidth}{0.4pt} 
 }
@@ -197,11 +198,11 @@
 
 \include{additionalPages/titlePage}
 
-%================== DEDICATION ====================
-\newpage
-\thispagestyle{empty}
-\pagestyle{empty}
-\include{additionalPages/dedication}
+% %================== DEDICATION ====================
+% \newpage
+% \thispagestyle{empty}
+% \pagestyle{empty}
+% \include{additionalPages/dedication}
 
 %================== COPYRIGHT ====================
 \newpage
@@ -211,7 +212,7 @@
 \begin{center}
 \textcopyright~
 \textbf{NATIONAL INSTITUTE OF TECHNOLOGY, UTTARAKHAND}\\[0.3cm]
-\textbf{SRINAGAR (GARHWAL) - 2025}\\[0.3cm]
+\textbf{SRINAGAR (GARHWAL) - 2026}\\[0.3cm]
 \textbf{ALL RIGHTS RESERVED}
 \end{center}
 \vspace*{\fill}
@@ -240,10 +241,10 @@
 \pagestyle{resume}
 \include{additionalPages/acknowledgement}
 
-%================== RESUME ==============
-\thispagestyle{resume}
-\pagestyle{resume}
-\include{additionalPages/resume}
+% %================== RESUME ==============
+% \thispagestyle{resume}
+% \pagestyle{resume}
+% \include{additionalPages/resume}
 
 %================== ABSTRACTs ==============
 \thispagestyle{abstract}
@@ -298,9 +299,9 @@
 
 %================== ACTUAL CHAPTERS START HERE ==============
 \newpage
-\customchapter{1}{\MakeUppercase{Introduction and Overview}}
+\customchapter{1}{\MakeUppercase{Introduction }}
 \label{chap:introduction}
-\thispagestyle{chapterA2}
+\thispagestyle{chapterA1}
 \pagestyle{chapterA1}
 \input{chapters/chapter1/introduction}
 
@@ -319,32 +320,32 @@
 % \input{chapters/chapter3/system_configuration}
 
 \newpage
-\customchapter{3}{\MakeUppercase{Control Strategies}}
+\customchapter{3}{\MakeUppercase{Background and Motivation}}
 \label{chap:rl}
 \thispagestyle{chapterA3}
 \pagestyle{chapterA3}
-\input{chapters/chapter4/control_strategies}
+\input{chapters/chapter3/Background}
 
 \newpage
-\customchapter{4}{\MakeUppercase{Modelling and Simulation}}
+\customchapter{4}{\MakeUppercase{Objectives}}
 \label{chap:ddpg}
 \thispagestyle{chapterA4}
 \pagestyle{chapterA4}
-\input{chapters/chapter5/modelling_and_simulation}
+\input{chapters/chapter4/Objectives}
 
 \newpage
-\customchapter{5}{\MakeUppercase{Experimental Validation Framework}}
+\customchapter{5}{\MakeUppercase{Thesis Organization}}
 \label{chap:td3}
 \thispagestyle{chapterA5}
 \pagestyle{chapterA5}
-\input{chapters/chapter6/experimental_validation_framework}
+\input{chapters/chapter5/ThesisOrganization}
 
 \newpage
-\customchapter{6}{\MakeUppercase{Performance Evaluation and Results}}
+\customchapter{6}{\MakeUppercase{Major Contributions}}
 \label{chap:experimental}
 \thispagestyle{chapterA6}
 \pagestyle{chapterA6}
-\input{chapters/chapter7/performance_evaluation_and_results}
+\input{chapters/chapter6/MajorContributions}
 
 % \newpage
 % \customchapter{8}{\MakeUppercase{Critical Discussions}}
@@ -353,12 +354,12 @@
 % \pagestyle{chapterA8}
 % \input{chapters/chapter8/critical_discussion}   
 
-\newpage
-\customchapter{7}{\MakeUppercase{Conclusions and Future Scope}}
-\label{chap:conclusions}
-\thispagestyle{chapterA7}
-\pagestyle{chapterA7}
-\input{chapters/chapter9/conclusion_and_future_scope}
+% \newpage
+% \customchapter{7}{\MakeUppercase{Conclusions and Future Scope}}
+% \label{chap:conclusions}
+% \thispagestyle{chapterA7}
+% \pagestyle{chapterA7}
+% \input{chapters/chapter9/conclusion_and_future_scope}
 
 \newpage
 \thispagestyle{plain}
