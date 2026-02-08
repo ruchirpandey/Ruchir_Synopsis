@@ -1,7 +1,7 @@
 
 \section{Introduction}
 
-This chapter presents the implementation of DDPG \cite{Lillicrap2015} and TD3 \cite{Fujimoto2018} algorithms for unified control of the hybrid DFIG-Solar PV system. The theoretical foundations of deep reinforcement learning---including the MDP formulation, policy gradient methods, actor-critic architecture, experience replay, and target networks---are detailed in Chapter~\ref{chap:rl}. Here, the focus is on the proposed control framework design and algorithm-specific implementation decisions.
+This chapter presents the implementation of DDPG \cite{Lillicrap2015} and TD3 \cite{Fujimoto2018} algorithms for unified control of the hybrid DFIG-Solar PV system. The theoretical foundations of deep reinforcement learning---including the MDP formulation, policy gradient methods, actor-critic architecture, experience replay, and target networks---are detailed in Chapter~\ref{chap:literature}. Here, the focus is on the proposed control framework design and algorithm-specific implementation decisions.
 
 The RL agent-environment interaction for the DFIG-PV system is illustrated in Figure~\ref{fig:rl_framework}, where the agent (DDPG or TD3 controller) observes system states and outputs converter voltage references, receiving reward feedback based on power tracking and voltage regulation performance.
 
@@ -68,7 +68,7 @@ Typical: $v_{min} = -400$ V, $v_{max} = +400$ V. Continuous actions enable fine-
 \subsection{System Dynamics Representation}
 \label{subsec:system_dynamics}
 
-System state evolution governed by nonlinear differential equations (Chapter 3):
+System state evolution governed by nonlinear differential equations (Chapter~\ref{chap:rl}):
 
 \begin{equation}
 \dot{\mathbf{s}} = f(\mathbf{s}, \mathbf{a}) = [\dot{i}_{qs}, \dot{i}_{ds}, \dot{i}_{qr}, \dot{i}_{dr}, \dot{\omega}_r, \dot{v}_{dc}, \dot{i}_{pv}, \dot{P}_s, \dot{Q}_s, \dot{P}_g, \dot{Q}_g, \dot{\theta}_r]^T
@@ -373,7 +373,7 @@ TD3 implementation \cite{Pandey2025TD3} addresses DDPG limitations via three inn
 \subsubsection{TD3 Innovations Applied to DFIG-PV Control}
 \label{subsec:td3_motivation}
 
-As detailed in Chapter~\ref{chap:rl}, TD3 addresses DDPG's overestimation bias, policy-value coupling, and hyperparameter sensitivity through three innovations: clipped double Q-learning, target policy smoothing, and delayed policy updates. This section focuses on the implementation-specific details for the DFIG-PV system.
+As detailed in Chapter~\ref{chap:literature}, TD3 addresses DDPG's overestimation bias, policy-value coupling, and hyperparameter sensitivity through three innovations: clipped double Q-learning, target policy smoothing, and delayed policy updates. This section focuses on the implementation-specific details for the DFIG-PV system.
 
 \subsubsection{Twin Critic Architecture}
 \label{subsec:td3_critics}
@@ -654,4 +654,4 @@ The minimum hardware requirement for real-time implementation is a Texas Instrum
 
 \textbf{Overall recommendation:} For the DFIG-Solar PV hybrid system, \textbf{TD3 is the preferred choice} for production deployment despite longer training time, due to its superior stability, robustness, and safety characteristics. DDPG remains valuable for rapid prototyping and initial development.
 
-The quantitative performance comparison based on OPAL-RT HIL simulation results is presented in Chapter 5.
+The quantitative performance comparison based on OPAL-RT HIL simulation results is presented in Chapter~\ref{chap:td3}.
