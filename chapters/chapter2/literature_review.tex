@@ -5,7 +5,7 @@
 
 \section{Introduction to Literature Review}
 
-This chapter reviews literature on DFIG-Solar PV hybrid systems and control strategies, tracing evolution from conventional to deep reinforcement learning approaches, emphasizing DDPG and TD3 applications in power systems.
+This chapter reviews literature on DFIG-Solar PV hybrid systems and control strategies, tracing evolution from conventional to deep reinforcement learning approaches, emphasizing DDPG and TD3 applications in power systems. The review draws upon recent comprehensive surveys on AI in renewable power systems \cite{Li2024, Tang2024} and RL-based microgrid control \cite{Waghmare2025}.
 
 % ============================================================================
 \section{Evolution of Wind-Solar Hybrid Systems}
@@ -112,7 +112,7 @@ MAO-RERNN \cite{MAO_RERNN_2025} achieves 1.56\% THD with 100 μs response time. 
 
 \subsection{Integration Topologies}
 
-Independent: dedicated converters (simple control, high cost/losses). DC link integration: PV at DFIG DC link via boost + shared GSC, 15--25\% cost reduction. Challenges: coordination, stability, MPPT interactions. Nindra et al. (2019): ±2\% voltage, THD < 4\%.
+Independent: dedicated converters (simple control, high cost/losses). DC link integration: PV at DFIG DC link via boost + shared GSC, 15--25\% cost reduction. Challenges: coordination, stability, MPPT interactions. Nindra et al. (2019): ±2\% voltage, THD < 4\%. Preliminary real-time investigation of this architecture using OPAL-RT platform \cite{Pandey2022PIICON} confirmed feasibility of solar PV integration at the DFIG DC link with stable operation under varying wind and irradiance conditions.
 
 \subsection{Maximum Power Point Tracking}
 
@@ -198,6 +198,8 @@ Supervised learning limitations: no sequential decisions, requires ground truth 
 \subsubsection{Transition to Deep RL}
 
 Traditional RL (Q-learning, SARSA) limitations: discrete actions only (cannot control continuous voltage/current), tabular representation (no scaling), cannot handle high-dimensional states, poor generalization. Deep RL solutions: NN function approximation for compact representation, continuous action spaces via actor-critic, generalization through learned features, effective scaling to complex high-dimensional systems.
+
+The evolution of deep RL proceeded through several key milestones: Deep Q-Networks (DQN, 2013) first demonstrated that neural networks could approximate Q-functions for high-dimensional state spaces; Asynchronous Advantage Actor-Critic (A3C, 2016) introduced parallel actor-critic training for improved stability and efficiency; DDPG \cite{Lillicrap2015} then combined deterministic policy gradients with DQN's experience replay and target networks to enable continuous control; and TD3 \cite{Fujimoto2018} further refined actor-critic methods by addressing DDPG's overestimation bias. This progression from discrete to continuous, and from single-critic to twin-critic architectures, directly underpins the algorithms evaluated in this thesis.
 
 % ============================================================================
 \section{Deep Reinforcement Learning Fundamentals}
@@ -401,12 +403,6 @@ DDPG has emerged as a powerful tool for grid-connected renewable energy systems,
 
 \textbf{Adaptive Voltage Regulation:} DDPG-based synergetic control for synchronous generator excitation systems \cite{Fathollahi2024} achieves fast adaptive voltage regulation and stability improvement under various disturbances. This approach is highly relevant for hybrid DFIG-PV systems that must maintain grid voltage within IEEE 1547 limits (±5\%) during rapid solar irradiance and wind speed variations.
 
-\subsubsection{Comparative Analysis: DDPG vs. TD3}
-
-While both algorithms share the deterministic policy gradient foundation, TD3's three key innovations address DDPG's primary weaknesses. TD3's twin critics reduce Q-value overestimation, leading to more conservative and stable policy learning. Delayed policy updates prevent rapid policy changes based on noisy Q-estimates, reducing policy oscillation. Target policy smoothing improves generalization and reduces sensitivity to hyperparameter choices, enhancing overall robustness.
-
-However, DDPG remains computationally simpler during training and may be preferable for real-time adaptive control scenarios where training overhead is critical.
-
 \subsection{DDPG Limitations}
 
 \subsubsection{Overestimation Bias}
@@ -537,7 +533,7 @@ Lee et al. (2023) TD3 dynamic droop control for AC microgrids: adaptive coeffici
 
 \subsubsection{Recent TD3 Advances (2024--2025)}
 
-\textbf{Virtual Power Plant Coordination \cite{VPP_TD3_2025}:} TD3-based DER coordination: wind/solar/storage aggregation, multi-objective optimization, 35\% cost reduction vs centralized, scales to 100+ units.
+\textbf{Virtual Power Plant Coordination \cite{VPP_TD3_2025}:} TD3-based DER coordination: wind/solar/storage aggregation, multi-objective optimization, 16.7\% cost reduction and 84.71\% higher mean reward vs DDPG baselines, scales to 100+ units.
 
 \textbf{Multi-Agent TD3 for AGC \cite{MATD3_AGC_2025}:} Decentralized multi-area control: independent agents per area, cooperative learning via shared critics, frequency < 0.05 Hz, 40\% faster response vs centralized.
 
@@ -563,15 +559,9 @@ The TD3 architecture with twin critic networks is illustrated in Figure~\ref{fig
     \label{fig:td3_actor_critic}
 \end{figure}
 
-\subsubsection{TD3 Applications in Renewable Energy Systems}
+\subsection{Comparative Analysis: DDPG vs. TD3}
 
-Recent research demonstrates TD3's effectiveness across multiple renewable energy applications:
-
-\textbf{Wind Energy Control:} TD3 has been successfully applied to maximum power point tracking (MPPT) in wind turbine systems \cite{Zholtayev2024}, showing superior robustness to parameter variations compared to model-based feedback linearization methods. The model-free nature of TD3 eliminates the need for accurate system models, making it particularly valuable for DFIG systems with complex nonlinear dynamics.
-
-\textbf{DC Microgrid Power Electronics:} For boost converter control in DC microgrids \cite{Muktiadji2024}, TD3 outperforms particle swarm optimization (PSO), genetic algorithms (GA), and conventional PI controllers with significantly reduced steady-state error and faster transient response times. This application is directly relevant to solar PV integration where DC-DC converters regulate the DC-link voltage.
-
-\textbf{Virtual Power Plant Management:} In large-scale renewable energy aggregation systems \cite{Hu2025VPP}, TD3-based energy management strategies achieve 84.71\% and 94.39\% higher mean reward compared to TD3-battery and DDPG-EV baselines, with 16.7\% cost reduction and 89.45\% reduction in microturbine output. These results demonstrate TD3's scalability and multi-objective optimization capabilities for complex hybrid renewable systems.
+Both algorithms share the deterministic policy gradient foundation, but TD3's three innovations directly address DDPG's documented weaknesses. Twin critics reduce Q-value overestimation bias---Khalid et al. (2022) \cite{Khalid2022} demonstrated 50\% overshoot reduction and 47\% settling time improvement when replacing DDPG with TD3 for load frequency control. Delayed policy updates prevent rapid policy changes based on noisy Q-estimates, reducing policy oscillation during training. Target policy smoothing improves generalization and reduces sensitivity to hyperparameter choices, enhancing overall robustness to parameter variations. However, DDPG remains computationally simpler during training (single critic, no delay scheduling) and may be preferable for real-time adaptive control scenarios where training overhead is critical. A systematic review of RL-based microgrid control \cite{Waghmare2025} confirms that while TD3 generally outperforms DDPG in stability-critical applications, the choice depends on specific deployment constraints including computational budget and real-time requirements.
 
 \subsection{Beyond TD3: Advanced Actor-Critic Methods}
 
@@ -594,6 +584,8 @@ where $\mathcal{H}(\pi(\cdot | s_t)) = -\mathbb{E}_{a \sim \pi}[\log \pi(a|s_t)]
 
 \textbf{SAC vs TD3:} Policy (deterministic/stochastic), exploration (noise/entropy), noise robustness (good/excellent), sample efficiency (high/moderate), stability (very high/high), tuning (easier/complex).
 
+\textbf{Microgrid Energy Management:} Improved SAC algorithms \cite{Yu2024} achieve 51.20\%, 52.38\%, and 13.43\% profit increases over DQN, SARSA, and PPO respectively for microgrid optimization. SAC's application to integrated energy systems with electricity, heat, and hydrogen storage \cite{Liang2024} demonstrates model-free control for multi-energy systems with complex energy coupling---relevant for future DFIG-PV systems integrated with storage.
+
 \textbf{When to Use SAC:} High noise, stochastic dynamics, exploration-heavy, multi-modal policies.
 
 \textbf{When TD3 is Preferred:} Deterministic dynamics, sample efficiency critical, faster convergence, tight computational constraints.
@@ -609,12 +601,6 @@ Extension of DDPG for multi-agent settings, suitable for coordinated control of 
 \textbf{Distributed Distributional DDPG (D4PG):}
 Combines distributional RL with DDPG, learning value distribution rather than expected value.
 
-\subsubsection{SAC for Microgrid Optimization}
-
-Soft Actor-Critic (SAC) extends actor-critic methods by maximizing both expected reward and policy entropy, promoting exploration and robustness \cite{Yu2024,Liang2024}. For microgrid energy management, improved SAC algorithms achieve 51.20\%, 52.38\%, and 13.43\% profit increases over DQN, SARSA, and PPO respectively, demonstrating superior economic optimization capabilities.
-
-SAC's application to integrated energy systems with electricity, heat, and hydrogen storage \cite{Liang2024} showcases model-free control for multi-energy systems with complex energy coupling—relevant for future DFIG-PV systems integrated with energy storage and hydrogen production facilities.
-
 \subsubsection{Multi-Objective Deep RL for Wind Turbines}
 
 Actor-critic deep RL enables multi-objective optimization beyond simple MPPT \cite{Frutos2025}. For 2.3 MW wind turbines, deep RL balances power maximization with operational constraints such as noise mitigation, mechanical stress reduction, and grid code compliance. This multi-objective capability is essential for commercial DFIG installations where regulatory compliance, equipment lifespan, and power quality must be simultaneously optimized.
@@ -623,11 +609,19 @@ Actor-critic deep RL enables multi-objective optimization beyond simple MPPT \ci
 
 Emerging quantum-inspired approaches \cite{Shen2024} demonstrate improved performance for frequency regulation in renewable-dominated microgrids. Quantum-inspired maximum entropy actor-critic (QISMEAC) algorithms outperform standard SAC and DDPG for handling renewable intermittency, offering potential pathways for next-generation control systems capable of managing high-penetration renewable grids with minimal frequency deviations (±0.2 Hz IEEE 1547 requirement).
 
-\subsection{Model-Free Control Advantages for Hybrid Systems}
+\subsection{Safety-Constrained Reinforcement Learning}
 
-The fundamental advantage of deep reinforcement learning for DFIG-PV hybrid systems lies in their model-free nature. Unlike model predictive control (MPC), DRL directly learns optimal policies from nonlinear system dynamics without requiring linearization or explicit system models. DRL controllers trained with diverse operating conditions demonstrate robust performance across parameter uncertainties inherent in renewable energy systems including turbine inertia variations, PV array degradation, and grid impedance changes. Actor-critic methods naturally handle continuous control signals such as rotor-side converter voltages and grid-side converter modulation indices without discretization artifacts. Finally, reward function design enables simultaneous optimization of multiple conflicting objectives including power maximization, grid stability, THD minimization, and fault ride-through capability.
+A critical challenge for deploying DRL controllers in power systems is ensuring safety during both training (exploration) and deployment. Standard DRL algorithms including DDPG and TD3 rely on unconstrained exploration that may produce actions violating operational limits---potentially causing equipment damage or grid instability. Recent reviews \cite{Waghmare2025, Li2024} identify safe RL as an emerging research priority for power system applications. Approaches include constrained Markov decision processes (CMDPs) with Lagrangian relaxation to enforce voltage and frequency limits, barrier function-based reward shaping that penalizes proximity to constraint boundaries, and physics-constrained architectures such as the physics-constrained TD3 demonstrated by Zholtayev et al. (2024) \cite{PhysicsConstrainedTD32024} for DFIG virtual inertia control, which integrates quadratic programming constraints directly into the TD3 framework. Despite these advances, formal safety guarantees for DRL controllers in grid-connected renewable systems remain an open problem, particularly for the tightly coupled dynamics of DFIG-PV hybrid systems.
 
-These advantages position TD3 and DDPG as promising alternatives to traditional PI/PID cascades and model-based controllers for next-generation hybrid renewable energy systems.
+\subsection{Simulation-to-Real Transfer Challenges}
+
+While DRL controllers achieve strong performance in simulation environments, bridging the gap to real-world deployment remains a significant challenge \cite{Ejiyi2025}. Key issues include: (i) model fidelity---simulation models may not capture all parasitic effects, switching transients, and sensor noise present in physical hardware; (ii) computational latency---neural network inference must meet real-time constraints (typically < 100 $\mu$s for power electronic control loops); and (iii) distribution shift---operating conditions encountered in deployment may differ from training distributions. Hardware-in-the-loop (HIL) testing platforms such as OPAL-RT provide an intermediate validation step between pure simulation and field deployment, enabling real-time execution with realistic signal conditioning and communication delays \cite{Pandey2022PIICON}. However, systematic methodologies for sim-to-real transfer of DRL controllers in power systems---including domain randomization, online adaptation, and robustness certification---remain largely unexplored.
+
+\subsection{Summary of DRL Approaches for Power Systems}
+
+Recent comprehensive reviews \cite{Li2024, Tang2024, Waghmare2025} identify several fundamental advantages of deep reinforcement learning for DFIG-PV hybrid systems. Unlike model predictive control (MPC) \cite{Joshal2023, Kamal2022}, DRL directly learns optimal policies from nonlinear system dynamics without requiring linearization or explicit system models. DRL controllers trained with diverse operating conditions demonstrate robust performance across parameter uncertainties inherent in renewable energy systems including turbine inertia variations, PV array degradation, and grid impedance changes \cite{Ejiyi2025}. Actor-critic methods naturally handle continuous control signals such as rotor-side converter voltages and grid-side converter modulation indices without discretization artifacts \cite{Lillicrap2015, Fujimoto2018}. Reward function design enables simultaneous optimization of multiple conflicting objectives including power maximization, grid stability, THD minimization, and fault ride-through capability \cite{Frutos2025}.
+
+These advantages position TD3 and DDPG as promising alternatives to traditional PI/PID cascades and model-based controllers for next-generation hybrid renewable energy systems \cite{Sofian2024, AbdulMajeed2025}.
 
 % ============================================================================
 \section{Research Gaps and Opportunities}
