@@ -219,13 +219,13 @@ Gradual task difficulty increase: \textbf{Phase 1 (Eps 1--100):} Random explorat
 
 All experiments are conducted over 5 independent training runs with different random seeds (seeds 0--4) for network initialization, replay buffer sampling, and exploration noise generation. Results are reported as mean $\pm$ standard deviation across these runs. The simulation environment is deterministic given the same seed, ensuring reproducibility. Model checkpoints are saved every 100 episodes, and the best-performing checkpoint (highest validation reward) is selected for HIL deployment.
 
-\subsubsection{Emergency Fallback Strategy}
+\subsubsection{Proposed Emergency Fallback Strategy}
 
-During both training and HIL deployment, a safety monitor continuously checks the DRL controller outputs against physical constraints. If any action violates converter voltage limits ($|v| > v_{max}$), DC link voltage deviates beyond $\pm$10\% of nominal, or the reward drops below a critical threshold for 10 consecutive steps, control is immediately transferred to a conventional PI controller with pre-tuned gains. This fallback mechanism ensures system safety during RL exploration and provides a fail-safe for unexpected operating conditions during deployment.
+For practical deployment of DRL controllers in power systems, a safety fallback mechanism is recommended. In the proposed design, a supervisory monitor would check DRL controller outputs against physical constraints---including converter voltage limits ($|v| > v_{max}$), DC link voltage deviation beyond $\pm$10\% of nominal, or sustained reward degradation over consecutive steps. Upon violation, control would transfer to a conventional PI controller with pre-tuned gains. While this fallback is not implemented in the current simulation framework, it represents an important consideration for future real-world deployment of the proposed DRL-based controllers.
 
 \subsection{Summary of Common Elements}
 
-These elements---state/action spaces, dynamics, reward, networks, infrastructure, normalization, and safety mechanisms---form the unified foundation for DDPG and TD3.
+These elements---state/action spaces, dynamics, reward, networks, infrastructure, and normalization---form the unified foundation for DDPG and TD3.
 
 
 % ------------------------------------------------------------
