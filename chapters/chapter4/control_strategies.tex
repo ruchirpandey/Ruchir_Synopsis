@@ -1,29 +1,17 @@
 
 \section{Introduction}
 
-This chapter presents the implementation of DDPG \cite{Lillicrap2015} and TD3 \cite{Fujimoto2018} algorithms for unified control of the hybrid DFIG-Solar PV system. The theoretical foundations of deep reinforcement learning---including the MDP formulation, policy gradient methods, actor-critic architecture, experience replay, and target networks---are detailed in Chapter~\ref{chap:literature}. Here, the focus is on the proposed control framework design and algorithm-specific implementation decisions.
+This chapter presents the implementation of DDPG \cite{Lillicrap2015} and TD3 \cite{Fujimoto2018} algorithms for unified control of the hybrid DFIG-Solar PV system. The theoretical foundations of deep reinforcement learning including the MDP formulation, policy gradient methods, actor-critic architecture, experience replay, and target networks are detailed in Chapter~\ref{chap:literature}. The chapter focuses on the proposed control framework design and algorithm-specific implementation decisions.
 
-The RL agent-environment interaction for the DFIG-PV system is illustrated in Figure~\ref{fig:rl_framework}, where the agent (DDPG or TD3 controller) observes system states and outputs converter voltage references, receiving reward feedback based on power tracking and voltage regulation performance.
+The RL agent-environment interaction for the DFIG-PV system where the agent (DDPG or TD3 controller) observes system states and outputs converter voltage references, receiving reward feedback based on power tracking and voltage regulation performance.
 
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[node distance=3cm, auto]
-        \node [draw, rectangle, minimum width=2cm, minimum height=1cm] (agent) {Agent};
-        \node [draw, rectangle, minimum width=2cm, minimum height=1cm, right of=agent, node distance=5cm] (env) {Environment};
-
-        \draw[->, thick] (agent) -- node[above] {action $a_t$} (env);
-        \draw[->, thick] (env) to [bend right=45] node[below] {state $s_t$, reward $r_t$} (agent);
-    \end{tikzpicture}
-    \caption{Agent-environment interaction in reinforcement learning for DFIG-PV control}
-    \label{fig:rl_framework}
-\end{figure}
 
 The actor-critic architecture (Figure~\ref{fig:actor_critic_general}) forms the basis for both algorithms, where the actor network learns the deterministic control policy $\mu_\theta(s)$ and the critic network(s) evaluate action quality via the Q-function $Q_\phi(s,a)$.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.7\textwidth]{images/Actor_Critic_Diagram.png}
-    \caption{General actor-critic architecture showing the interaction between policy network (actor) and value network (critic) in reinforcement learning-based control}
+    \caption{General actor-critic architecture}
     \label{fig:actor_critic_general}
 \end{figure}
 
@@ -154,17 +142,17 @@ DDPG and TD3 use deep neural networks for actor/critic approximation.
 
 Maps states to actions: $\mu(s|\theta_\mu) = \tanh(W_n\sigma(W_{n-1} \cdots \sigma(W_1 s + b_1) \cdots + b_{n-1}) + b_n)$ where $\sigma(x) = \max(0, x)$ (ReLU).
 
-\textbf{Architecture:} [11]-[400]-[300]-[4] with ReLU hidden, tanh output. Parameters: $N_{params,actor} = 125,504$.
+\textbf{Architecture:} It consists of input layer of [11] neurons with [400x300] hidden layers and output layers with [4] neurons with ReLU activation and tanh output.
 
 \subsubsection{Critic Network}
 
 Evaluates state-action pairs: $Q(s,a|\theta_Q) = W'_n\sigma(W'_{n-1} \cdots \sigma(W'_1[s,a] + b'_1) \cdots + b'_{n-1}) + b'_n$ where $[s,a]$ concatenates state/action.
 
-\textbf{Architecture:} [15]-[400]-[300]-[1] with ReLU hidden, linear output. Parameters: $N_{params,critic} = 126,701$. DDPG uses 1 critic, TD3 uses 2 (Section~\ref{subsec:td3_critics}).
+\textbf{Architecture:} It consists of input layer of [15] neurons with [400x300] hidden layers and output layers with [1] neurons with ReLU activation and linear output. DDPG uses 1 critic, TD3 uses 2 (Section~\ref{subsec:td3_critics}).
 
 \subsubsection{Weight Initialization}
 
-All hidden layers use He (Kaiming) initialization \cite{Lillicrap2015}: weights drawn from $\mathcal{U}(-\frac{1}{\sqrt{f_{in}}}, \frac{1}{\sqrt{f_{in}}})$ where $f_{in}$ is the fan-in of each layer. The actor output layer uses a uniform initialization from $\mathcal{U}(-3 \times 10^{-3}, 3 \times 10^{-3})$ to ensure initial actions are near zero, preventing large initial control signals that could destabilize the power system during early training episodes.
+All hidden layers use He (Kaiming) initialization \cite{Lillicrap2015}: weights drawn from $\mathcal{U}(-\frac{1}{\sqrt{f_{in}}}, \frac{1}{\sqrt{f_{in}}})$ where $f_{in}$ is the fan-in of each layer. The actor output layer uses a uniform initialization from $\mathcal{U}(-3 \times 10^{-3}, 3 \times 10^{-3})$ to ensure initial actions are near zero, preventing large initial control signals that could destabilize the learning process during early training episodes.
 
 \subsubsection{State Normalization}
 
@@ -177,7 +165,7 @@ where $s_{i,\min}$ and $s_{i,\max}$ are the expected operating ranges for each s
 
 \subsubsection{Gradient Clipping}
 
-To prevent training instability from large gradient magnitudes---particularly during early training when reward signals are noisy---L2 norm gradient clipping is applied to both actor and critic networks:
+To prevent training instability from large gradient magnitudes particularly during early training when reward signals are noisy L2 norm gradient clipping is applied to both actor and critic networks:
 \begin{equation}
 \hat{g} = \frac{g}{\max(1, \|g\|_2 / g_{\max})}
 \label{eq:gradient_clipping}
@@ -191,10 +179,10 @@ where $g_{\max} = 1.0$ for critic networks and $g_{\max} = 0.5$ for the actor ne
 
 \textbf{Software:} Python 3.8, TensorFlow 2.10.0/Keras, NumPy 1.23.0, OpenAI Gym 0.26.0, MATLAB R2021b (HIL).
 
-\textbf{Hardware:} Google Colab Pro (NVIDIA Tesla T4, 16 GB VRAM) for training; OPAL-RT OP5700 for HIL validation.
-
+\textbf{Hardware:} Google Colab Pro (NVIDIA Tesla T4, 16 GB VRAM) for training; OPAL-RT OP4510 for HIL validation.
+-------------------TBD------------------------
 \textbf{Recent Advances:} MATLAB/Simulink optimization \cite{Mauludin2025,Savio2025}, digital twins \cite{AlShetwi2025}, techno-economic frameworks \cite{Ayua2024}, multi-objective simulation \cite{Jacob2025}.
-
+-----------------------------------
 \subsubsection{Experience Replay}
 
 Replay buffer $\mathcal{B} = \{(s_t, a_t, r_t, s_{t+1})\}_{t=1:T}$ stores transitions. Random mini-batches sampled to break temporal correlations.
@@ -222,11 +210,11 @@ All experiments are conducted over 5 independent training runs with different ra
 \subsubsection{Proposed Emergency Fallback Strategy}
 
 For practical deployment of DRL controllers in power systems, a safety fallback mechanism is recommended. In the proposed design, a supervisory monitor would check DRL controller outputs against physical constraints---including converter voltage limits ($|v| > v_{max}$), DC link voltage deviation beyond $\pm$10\% of nominal, or sustained reward degradation over consecutive steps. Upon violation, control would transfer to a conventional PI controller with pre-tuned gains. While this fallback is not implemented in the current simulation framework, it represents an important consideration for future real-world deployment of the proposed DRL-based controllers.
-
+-------------------------tbd----------------
 \subsection{Summary of Common Elements}
 
 These elements---state/action spaces, dynamics, reward, networks, infrastructure, and normalization---form the unified foundation for DDPG and TD3.
-
+-------------------------------------------
 
 % ------------------------------------------------------------
 % SECTION 5.2: DDPG IMPLEMENTATION
@@ -521,6 +509,13 @@ To quantify the individual contribution of each TD3 innovation to DFIG-PV contro
 Each configuration is trained for 2500 episodes over 5 random seeds using identical hyperparameters (except for the ablated component). Evaluation metrics include: mean episode reward, DC link voltage regulation error ($\Delta v_{dc}$), active/reactive power tracking RMSE, overestimation bias ($\mathbb{E}[Q_\phi - Q^\pi]$ estimated via Monte Carlo rollouts), and convergence speed (episodes to reach 90\% of final performance). Results are presented in Chapter~\ref{chap:td3}.
 
 % ------------------------------------------------------------
+% SECTION 5.4: TRAINING RESULTS
+% ------------------------------------------------------------
+
+\subsection{TRAINING RESULTS}
+\label{sec:training_results}
+
+% ------------------------------------------------------------
 % SECTION 5.4: IMPLEMENTATION COMPARISON
 % ------------------------------------------------------------
 
@@ -569,10 +564,14 @@ a = \mu(s|\theta_\mu) \rightarrow O(125,504) \text{ operations}
 \end{equation}
 
 \textbf{Critical insight:} Both algorithms have \textbf{identical inference complexity}. The twin critics are only used during training, not during real-time deployment. This means TD3's computational overhead during training does not impact real-time control performance.
-
+\\
+----------------tbd--------
+\\
 \subsubsection{Memory Requirements}
 \label{subsec:memory_requirements}
-
+\\
+----------------tbd--------
+\\
 \begin{table}[htbp]
 \centering
 \caption{Memory requirements comparison}

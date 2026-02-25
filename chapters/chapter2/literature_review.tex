@@ -5,16 +5,15 @@
 
 \section{Introduction to Literature Review}
 
-This chapter reviews literature on DFIG-Solar PV hybrid systems and control strategies, tracing evolution from conventional to deep reinforcement learning approaches, emphasizing DDPG and TD3 applications in power systems. The review draws upon recent comprehensive surveys on AI in renewable power systems \cite{Li2024, Tang2024} and RL-based microgrid control \cite{Waghmare2025}.
+This chapter reviews literature on DFIG-Solar PV hybrid systems and control strategies, tracing evolution from conventional to deep reinforcement learning approaches, emphasizing DDPG and TD3 applications in power systems. The review is based upon recent comprehensive surveys on AI in renewable power systems \cite{Li2024, Tang2024} and RL-based microgrid control \cite{Waghmare2025}.
 
 % ============================================================================
-\section{Evolution of Wind-Solar Hybrid Systems}
+\section{Wind-Solar Hybrid Systems}
 
-Hybrid wind-solar integration has evolved from simple parallel operation to sophisticated coordinated control over the past two decades.
+Hybrid wind-solar integration has evolved from simple parallel operation to sophisticated coordinated control over the past two decades. The paradigm has shifted from separate optimized control to integrated controls as discussed in detail in further subsection.
 
 \subsection{Early Hybrid Systems (2000--2010)}
-
-Independent converters, separate MPPT, minimal coordination (Lasseter et al. CERTS microgrid). High costs, suboptimal efficiency limited deployment.
+Early hybrid systems had independent converters, separate MPPT algorithms, minimal coordination (Lasseter et al. CERTS microgrid). High costs and suboptimal efficiency limited deployment. Since then Power electronics and computational technologies have evolved and matured , now it is possible to have both integrated systems and control.
 
 \subsection{Integrated Architectures (2010--2020)}
 
@@ -26,9 +25,9 @@ Bhattacharyya and Singh (2022) integrated BESS with DFIG-PV systems, achieving 4
 
 \subsubsection{Grid Stability and Frequency Regulation (2024--2025)}
 
-Smahi et al. (2025) \cite{Smahi2025} review grid inertia solutions including VSM for synthetic inertia, fast-responding BESS, and AI-driven adaptive control. He et al. (2024) \cite{He2024} achieve 200 ms wind turbine FFR, 45\% better frequency nadir, and 35\% RoCoF reduction. MSESO-GADRC \cite{MSESO_GADRC_2025} demonstrates 60\% disturbance rejection improvement over PI with robustness to 40\% parameter variations.
+Smahi et al. (2025) \cite{Smahi2025} review grid inertia solutions including VSM for synthetic inertia, fast-responding BESS, and AI-driven adaptive control. He et al. (2024) \cite{He2024} achieve 200 ms wind turbine FFR, 45\% better frequency, and 35\% RoCoF reduction. MSESO-GADRC \cite{MSESO_GADRC_2025} demonstrates 60\% disturbance rejection improvement over PI with robustness to 40\% parameter variations.
 
-\textbf{Stability Metrics:}
+\textbf{Stability Parameters:}
 \begin{itemize}
     \item Frequency deviation: ±0.2 Hz standard (±0.05--0.10 Hz advanced)
     \item RoCoF: 1.0 Hz/s standard (0.3--0.5 Hz/s advanced)
@@ -38,7 +37,7 @@ Smahi et al. (2025) \cite{Smahi2025} review grid inertia solutions including VSM
 
 \subsection{Modern Smart Grid Integration (2020--Present)}
 
-Recent developments include energy internet concepts (Yue and Han, 2019), multi-microgrid architectures (Hong et al., 2018), and prosumer-based systems (Zafar et al., 2018). Prasad et al. (2025) achieved 98.5\% MPPT efficiency with coordinated RSC-GSC control. GridIntegratedDFIG2025 demonstrated adaptive control achieving 2.60\% THD via OPAL-RT validation. Hybrid MPPT \cite{HybridMPPT2024} achieves 97.8--98.9\% efficiency versus 80--88\% conventional. Modern systems feature enhanced grid support, predictive control, ML-based optimization, and storage integration \cite{WindBattery2025}.
+Recent developments include energy internet concepts (Yue and Han, 2019), multi-microgrid architectures (Hong et al., 2018), and prosumer-based systems where consumer becomes producers with renewable energy (Zafar et al., 2018). Prasad et al. (2025) achieved 98.5\% MPPT efficiency with coordinated RSC-GSC control. GridIntegratedDFIG2025 demonstrated adaptive control achieving 2.60\% THD via OPAL-RT validation. Hybrid MPPT \cite{HybridMPPT2024} achieves 97.8--98.9\% efficiency versus 80--88\% conventional. Modern systems feature enhanced grid support, predictive control, ML-based optimization, and storage integration \cite{WindBattery2025}.
 
 % ============================================================================
 \section{Doubly Fed Induction Generator Technology}
@@ -110,9 +109,16 @@ MAO-RERNN \cite{MAO_RERNN_2025} achieves 1.56\% THD with 100 μs response time. 
 % ============================================================================
 \section{Solar PV Integration Architectures}
 
+\subsection{PV System Modeling}
+The single diode model was chosen for the modeling of solar-PV as it provides fast calculation of the parameters.
+
 \subsection{Integration Topologies}
 
-Independent: dedicated converters (simple control, high cost/losses). DC link integration: PV at DFIG DC link via boost + shared GSC, 15--25\% cost reduction. Challenges: coordination, stability, MPPT interactions. Nindra et al. (2019): ±2\% voltage, THD < 4\%. Preliminary real-time investigation of this architecture using OPAL-RT platform \cite{Pandey2022PIICON} confirmed feasibility of solar PV integration at the DFIG DC link with stable operation under varying wind and irradiance conditions.
+\begin{enumerate}
+    \item Independent dedicated converters with simple control and  high cost/losses.
+\item DC link integration with PV at DFIG DC link via boost and shared GSC resulting in 15--25\% cost reduction. 
+\end{enumerate}
+The challenges with integrated topology are coordination, stability and  MPPT interactions. Nindra et al. (2019) showed  ±2\% voltage, THD < 4\% for integrated topology. The preliminary real-time investigation of this architecture using OPAL-RT platform \cite{Pandey2022PIICON} confirmed feasibility of solar PV integration at the DFIG DC link with stable operation under varying wind and irradiance conditions.
 
 \subsection{Maximum Power Point Tracking}
 
@@ -120,91 +126,87 @@ P\&O algorithm: perturbs voltage, observes power change, adjusts direction. Trac
 
 Advanced methods: Deep RL-based MPPT achieves 99.2\% efficiency with < 0.5s convergence and no steady-state oscillation \cite{MPPT_AI_Review_2025}. Kumar et al. (2024) unified controller achieves 98.5\% efficiency managing wind and solar simultaneously with reduced sensors.
 
-\subsection{PV System Modeling}
-
-\textbf{Single-Diode Model:}
-\begin{equation}
-I = I_{ph} - I_s \left( e^{\frac{V + IR_s}{n_s V_t}} - 1 \right) - \frac{V + IR_s}{R_p}
-\end{equation}
-
-\textbf{Temperature Effects:}
-\begin{align*}
-I_{ph}(T) &= I_{ph,ref} [ 1 + \alpha_I (T - T_{ref}) ] \\
-V_{oc}(T) &= V_{oc,ref} [ 1 + \beta_V (T - T_{ref}) ]
-\end{align*}
-where $\alpha_I \approx +0.06\%/°C$ (current coefficient), $\beta_V \approx -0.3\%/°C$ (voltage coefficient).
-
-\subsubsection{Model Validation}
-
-Yang et al. (2021): < 2\% error vs experimental data, real-time computational efficiency, thermal dynamics included. Validation: 200--1000 W/m² irradiance, 15--45°C temperature range.
 
 % ============================================================================
 \section{Conventional Control Strategies}
 
 \subsection{PI Controller Fundamentals}
 
-PI controllers ($u(t) = K_p e(t) + K_i \int_0^t e(\tau) d\tau$, $G_c(s) = \frac{K_p s + K_i}{s}$) are widely deployed for simplicity, reliability, low computation (> 10 kHz), and zero steady-state error. Limitations: fixed parameters degrade performance away from design point, linear approximation breaks down under large signals/saturation/cross-coupling, single-objective focus requires separate controllers, and tuning complexity without optimality guarantee.
+% PI controllers ($u(t) = K_p e(t) + K_i \int_0^t e(\tau) d\tau$, $G_c(s) = \frac{K_p s + K_i}{s}$)
+PI controllers are widely deployed for simplicity, reliability, low computation > 10 kHz, and zero steady-state error. The limitations are the fixed parameters degrade performance away from design point, linear approximation breaks down under large signals/saturation/cross-coupling, single-objective focus requires separate controllers, and tuning complexity without optimality assurance.
 
 \subsection{Advanced Classical Control Methods}
+\\
+\textbf{Sliding Mode Control:} Yao et al. (2016) implemented SMC ($s(x) = 0$, $u = u_{eq} + u_{sw}$) achieving 150 ms settling (vs 200 ms PI), 8\% overshoot (vs 12\% PI). Limitations: chattering (5-10\%), high switching frequency, complexity.
 
-**Backstepping:** Linares-Flores et al. (2015) achieved < 0.5\% tracking error with Lyapunov stability guarantees. Limitations: requires accurate model, complex implementation, computationally intensive.
-
-**Sliding Mode Control:** Yao et al. (2016) implemented SMC ($s(x) = 0$, $u = u_{eq} + u_{sw}$) achieving 150 ms settling (vs 200 ms PI), 8\% overshoot (vs 12\% PI). Limitations: chattering (5-10\%), high switching frequency, complexity.
-
-**Model Predictive Control:** Elbarbary et al. (2024) achieved 1.8\% THD, ±1.5\% DC link regulation via optimization:
+\textbf{Model Predictive Control:} Elbarbary et al. (2024) achieved 1.8\% THD, ±1.5\% DC link regulation via optimization:
 \begin{equation}
 \min_{u} \sum_{k=0}^{N_p} \left\| x_{ref}(k) - x(k) \right\|_Q^2 + \sum_{k=0}^{N_c} \left\| u(k) \right\|_R^2
 \end{equation}
 
-Recent MPC advances \cite{RealTimeMPC2025, DynamicMPC_PSO_2025}: 1 kHz update rates, 43\% cost reduction, PSO-enhanced tuning. Despite advances, MPC requires accurate models and expert tuning, motivating model-free RL approaches.
+\textbf{Recent MPC advances} \cite{RealTimeMPC2025, DynamicMPC_PSO_2025}: 1 kHz update rates, 43\% cost reduction, PSO-enhanced tuning. Despite advances, MPC requires accurate models and expert tuning, motivating model-free RL approaches.
 
 
 
-\textbf{Classical Control Comparison:} PI (low complexity/computation, no adaptability, low model dependency), Backstepping (high complexity, limited adaptability, medium computation, high model dependency), SMC (medium complexity/computation/dependency), MPC (very high complexity/computation/dependency, medium adaptability).
+\textbf{Classical Control Comparison:} PI shows low complexity and computation, low adaptability and low model dependency, The Backstepping method has high complexity, limited adaptability, medium computation, and high model dependency, SMC shows medium complexity and computation dependency and MPC has very high complexity,computation, model dependency but shows better adaptability.
 
 % ============================================================================
-\section{Machine Learning in Power Systems}
+\section{Machine Learning(ML) in Power Systems}
 
-\subsection{Evolution of AI in Power Systems}
+\subsection{Evolution of ML in Power Systems}
 
-\subsubsection{Early Applications (1990--2010)}
+\subsubsection{Early Applications of ML (1990--2010)}
 
-Early ML employed expert systems for fault diagnosis/load forecasting, artificial neural networks for load prediction/harmonic estimation, and fuzzy logic for MPPT/stabilizers/load frequency control.
+Early ML models employed expert systems for fault diagnosis, load forecasting, artificial neural networks for load prediction,harmonic estimation and fuzzy logic for MPPT,stabilizers and load frequency control.
 
-\subsubsection{Modern Deep Learning Era (2010--Present)}
+\subsubsection{Modern Deep Learning Era for ML (2010--Present)}
 
-Wu et al. (2024) demonstrated DBN-based emergency control achieving 98.5\% accuracy, < 50 ms response, 1.2\% false alarms. Limitations for real-time control: no direct action output, requires separate control logic, unsuitable for continuous control, cannot learn optimal policies end-to-end through system interaction.
+Wu et al. (2024) demonstrated DBN-based emergency control achieving 98.5\% accuracy, < 50 ms response, 1.2\% false alarms. Limitations for real-time control: no direct action output, it requires separate control logic and is unsuitable for continuous control. It cannot learn optimal policies end-to-end through system interaction.
 
 \subsection{Supervised Learning Approaches}
 
-\subsubsection{Support Vector Machines}
+\subsubsection{Support Vector Machines (SVM)}
 
-SVMs: load forecasting, fault classification, power quality detection. Advantages: good generalization with limited data, high-dimensional handling, overfitting robustness. Control limitations: static mapping without temporal dynamics, no sequential decisions, requires expert features, cannot optimize long-term objectives.
+SVMs are used in load forecasting, fault classification and power quality detection. The advantages of SVMs are good generalization with limited data, high-dimensional handling capability and certain amount of immunity for overfitting. The control limitations for SVMs are static mapping without temporal dynamics, no sequential decisions, requires expert features and it cannot optimize long-term objectives.
 
 \subsubsection{Deep Neural Networks}
 
-DNNs: renewable forecasting, state estimation, cybersecurity. Benbouhenni et al. (2024) \cite{Benbouhenni2024} fractional-order fuzzy-NN for DFIG: THD 2.1\%, adaptive tuning, ±30\% robustness, superior transients.
+DNNs are used in renewable forecasting, state estimation, cybersecurity.
+
+Benbouhenni et al. (2024) \cite{Benbouhenni2024} applied fractional-order fuzzy-NN for DFIG with THD 2.1\%, adaptive tuning, ±30\% robustness and superior transients.
 
 \textbf{Hybrid Neuro-Fuzzy:} Combines fuzzy interpretability/expert knowledge with NN learning/approximation for human-understandable rules with data-driven optimization.
 
-\textbf{Performance:} THD: PI 4.5\%, Fuzzy 3.2\%, Neuro-Fuzzy 2.1\%. Settling: baseline, -15\%, -35\%. Overshoot: 8\%, 5.5\%, 3.2\%. Adaptability: none, limited, high.
+\textbf{Comparative Performance:} 
+\begin{itemize}
+    \item THD: PI 4.5\%, Fuzzy 3.2\%, Neuro-Fuzzy 2.1\%. 
+    \item Settling: baseline, -15\%, -35\%. 
+    \item Overshoot: 8\%, 5.5\%, 3.2\%. 
+    \item Adaptability: none, limited, high respectively.
+\end{itemize}
 
 \subsection{Reinforcement Learning Emergence}
 
-\subsubsection{Why RL for Power System Control?}
+\subsubsection{RL for Power System Control}
 
-Supervised learning limitations: no sequential decisions, requires ground truth (often unknown), no exploration, static policies. RL advantages: learns from interaction without labels, optimizes long-term objectives, explores to discover novel strategies, adapts online, handles delayed consequences via credit assignment.
+The supervised learning had limitations like no sequential decisions, requires ground truth often unknown, no exploration and static policies. The RL has certain advantages as it learns from interaction without labels, optimizes long-term objectives, explores to discover novel strategies, adapts online, handles consequences via rewards.
 
 \subsubsection{Transition to Deep RL}
 
-Traditional RL (Q-learning, SARSA) limitations: discrete actions only (cannot control continuous voltage/current), tabular representation (no scaling), cannot handle high-dimensional states, poor generalization. Deep RL solutions: NN function approximation for compact representation, continuous action spaces via actor-critic, generalization through learned features, effective scaling to complex high-dimensional systems.
+Traditional RL (Q-learning, SARSA) has the limitations of having discrete actions only and cannot control continuous voltage and currents, tabular representation having no scaling, cannot handle high-dimensional states and poor generalization. The Deep RL gives the solutions by NN function approximation for compact representation, continuous action spaces via actor-critic, generalization through learned features and have effective scaling to complex high-dimensional systems.
 
-The evolution of deep RL proceeded through several key milestones: Deep Q-Networks (DQN, 2013) first demonstrated that neural networks could approximate Q-functions for high-dimensional state spaces; Asynchronous Advantage Actor-Critic (A3C, 2016) introduced parallel actor-critic training for improved stability and efficiency; DDPG \cite{Lillicrap2015} then combined deterministic policy gradients with DQN's experience replay and target networks to enable continuous control; and TD3 \cite{Fujimoto2018} further refined actor-critic methods by addressing DDPG's overestimation bias. This progression from discrete to continuous, and from single-critic to twin-critic architectures, directly underpins the algorithms evaluated in this thesis.
+The evolution of deep RL proceeded through several key milestones: 
+\begin{itemize}
+    \item Deep Q-Networks (DQN, 2013) first demonstrated that neural networks could approximate Q-functions for high-dimensional state spaces.
+\item Asynchronous advantage Actor-Critic (A3C, 2016) introduced parallel actor-critic training for improved stability and efficiency.
+\item DDPG \cite{Lillicrap2015} then combined deterministic policy gradients with DQN's experience replay and target networks to enable continuous control.
+\item TD3 \cite{Fujimoto2018} further refined actor-critic methods by addressing DDPG's overestimation bias. This progression from discrete to continuous, and from single-critic to twin-critic architectures, directly underpins the algorithms evaluated in this thesis.
+\end{itemize}
 
 % ============================================================================
-\section{Deep Reinforcement Learning Fundamentals}
+\section{Deep Reinforcement Learning}
 
-\subsection{Decision Process Formulation}
+\subsection{Formulation of Decision Process}
 
 \subsubsection{Mathematical Framework}
 
@@ -322,7 +324,7 @@ L(\phi) &= \mathbb{E}_{(s, a, r, s') \sim \mathcal{B}} [(y_t - Q_{\phi}(s_t, a_t
 
 \subsubsection{Algorithm Overview}
 
-Lillicrap et al. (2015) \cite{Lillicrap2015} introduced DDPG as a model-free, off-policy algorithm combining DPG, DQN (experience replay, target networks), and actor-critic methods. Key innovation: extends actor-critic to continuous action spaces via deterministic policy gradients, suitable for power system control.
+Lillicrap et al. (2015) \cite{Lillicrap2015} introduced DDPG as a model-free, off-policy algorithm combining DPG, DQN (experience replay, target networks), and actor-critic methods. It extends actor-critic to continuous action spaces via deterministic policy gradients, suitable for power system control.
 
 
 \subsubsection{Core Components}
@@ -333,7 +335,7 @@ Lillicrap et al. (2015) \cite{Lillicrap2015} introduced DDPG as a model-free, of
 \mathcal{B} = \{(s_t, a_t, r_t, s_{t+1})\}_{t=1}^N
 \end{equation}
 
-Benefits: breaks temporal correlations (improves sample efficiency), enables off-policy learning, allows mini-batch training (stable gradients), improves data efficiency via reuse.
+It improves sample efficiency, enables off-policy learning, allows mini-batch training with stable gradients and improves data efficiency via reuse.
 
 \item \textbf{Target Networks:}
 \begin{align}
@@ -409,15 +411,15 @@ DDPG has emerged as a powerful tool for grid-connected renewable energy systems,
 
 Critic errors lead to overestimated Q-values ($\mathbb{E}[Q_{\phi}(s, a)] > Q^*(s, a)$). Actor exploits errors causing: aggressive control beyond safe limits, policy instability with oscillations, system overshoots, poor generalization, training divergence in later stages.
 
-Khalid et al. (2022) load frequency control: DDPG overshoot 11.2\% (above limits), oscillation 2-3s (instability), settling 14s (too slow), divergence after 1000+ episodes.
+Khalid et al. (2022) showed load frequency control with DDPG overshoot 11.2\% (above limits), oscillation 2-3s (instability), slow settling 14s and  divergence after 1000+ episodes.
 
 \subsubsection{High Variance in Learning}
 
-Coupled actor-critic updates: unstable policies (critic changes affect actor), high Q-value variance (moving target), excessive hyperparameter sensitivity, inconsistent convergence across seeds.
+The coupled actor-critic updates causes unstable policies  where critic changes affect actor, high Q-value variance due to moving target, hyperparameter over-sensitivity and inconsistent convergence.
 
 \subsubsection{Hyperparameter Sensitivity}
 
-DDPG requires careful tuning: learning rates ($\alpha_{\mu}$, $\alpha_Q$), target update rate ($\tau$), noise parameters ($\sigma$, $\theta$), network architecture (layers, neurons), training parameters (batch size, buffer size). Small changes (factor 2-3) can mean failure vs success.
+DDPG requires careful tuning of learning rates ($\alpha_{\mu}$, $\alpha_Q$), target update rate ($\tau$), noise parameters ($\sigma$, $\theta$), network architecture (layers, neurons), training parameters (batch size, buffer size). Small changes (factor 2-3) can mean failure vs success.
 
 % ============================================================================
 \section{Twin Delayed Deep Deterministic Policy Gradient}
@@ -514,7 +516,7 @@ Zholtayev et al. (2024) applied TD3 for virtual inertia and damping control in D
 
 \textbf{Physics-Constrained TD3:} Physical limits in reward function, constraint satisfaction via clipping/projection, model-based initialization for warm start.
 
-\textbf{Results:} Frequency nadir +40\% vs conventional, RoCoF reduced 35\%, oscillation damping +50\% vs DDPG, robust to 30\% parameter variations, converged in 2000 episodes (≈10 hours).
+\textbf{Results:} nadir et al. showed Frequency stability by +40\% vs conventional, RoCoF reduced by 35\%, oscillation damping at +50\% vs DDPG, robustness to 30\% parameter variations and converged in 2000 episodes (≈10 hours).
 
 
 \subsubsection{Load Frequency Control}
@@ -555,13 +557,13 @@ The TD3 architecture with twin critic networks is illustrated in Figure~\ref{fig
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{images/TD3ActorCritic.png}
-    \caption{TD3 actor-critic network architecture with twin critic networks ($Q_1$ and $Q_2$) for improved value estimation and reduced overestimation bias in DFIG-Solar PV hybrid system control}
+    \caption{TD3 actor-critic network architecture }
     \label{fig:td3_actor_critic}
 \end{figure}
 
 \subsection{Comparative Analysis: DDPG vs. TD3}
 
-Both algorithms share the deterministic policy gradient foundation, but TD3's three innovations directly address DDPG's documented weaknesses. Twin critics reduce Q-value overestimation bias---Khalid et al. (2022) \cite{Khalid2022} demonstrated 50\% overshoot reduction and 47\% settling time improvement when replacing DDPG with TD3 for load frequency control. Delayed policy updates prevent rapid policy changes based on noisy Q-estimates, reducing policy oscillation during training. Target policy smoothing improves generalization and reduces sensitivity to hyperparameter choices, enhancing overall robustness to parameter variations. However, DDPG remains computationally simpler during training (single critic, no delay scheduling) and may be preferable for real-time adaptive control scenarios where training overhead is critical. A systematic review of RL-based microgrid control \cite{Waghmare2025} confirms that while TD3 generally outperforms DDPG in stability-critical applications, the choice depends on specific deployment constraints including computational budget and real-time requirements.
+Both algorithms share the deterministic policy gradient foundation, but TD3's three innovations directly address DDPG's known weaknesses. Twin critics reduce Q-value overestimation bias---Khalid et al. (2022) \cite{Khalid2022} demonstrated 50\% overshoot reduction and 47\% settling time improvement when replacing DDPG with TD3 for load frequency control. Delayed policy updates prevent rapid policy changes based on noisy Q-estimates, reducing policy oscillation during training. Target policy smoothing improves generalization and reduces sensitivity to hyperparameter choices, enhancing overall robustness to parameter variations. However, DDPG remains computationally simpler during training (single critic, no delay scheduling) and may be preferable for real-time adaptive control scenarios where training overhead is critical. A systematic review of RL-based microgrid control \cite{Waghmare2025} confirms that while TD3 generally outperforms DDPG in stability-critical applications, the choice depends on specific deployment constraints including computational burden and real-time requirements.
 
 \subsection{Beyond TD3: Advanced Actor-Critic Methods}
 
@@ -569,7 +571,7 @@ Both algorithms share the deterministic policy gradient foundation, but TD3's th
 
 While DDPG and TD3 use deterministic policies, Soft Actor-Critic (SAC) introduces entropy regularization for enhanced exploration and robustness.
 
-\textbf{Key Innovation - Maximum Entropy RL:}
+\textbf{Inclusion of Maximum Entropy RL:}
 \begin{equation}
 J(\pi) = \sum_{t=0}^{T} \mathbb{E}_{(s_t, a_t) \sim \rho_{\pi}} [r(s_t, a_t) + \alpha \mathcal{H}(\pi(\cdot | s_t))]
 \end{equation}
@@ -586,9 +588,9 @@ where $\mathcal{H}(\pi(\cdot | s_t)) = -\mathbb{E}_{a \sim \pi}[\log \pi(a|s_t)]
 
 \textbf{Microgrid Energy Management:} Improved SAC algorithms \cite{Yu2024} achieve 51.20\%, 52.38\%, and 13.43\% profit increases over DQN, SARSA, and PPO respectively for microgrid optimization. SAC's application to integrated energy systems with electricity, heat, and hydrogen storage \cite{Liang2024} demonstrates model-free control for multi-energy systems with complex energy coupling---relevant for future DFIG-PV systems integrated with storage.
 
-\textbf{When to Use SAC:} High noise, stochastic dynamics, exploration-heavy, multi-modal policies.
+\textbf{SAC use case:} High noise, stochastic dynamics, exploration-heavy, multi-modal policies.
 
-\textbf{When TD3 is Preferred:} Deterministic dynamics, sample efficiency critical, faster convergence, tight computational constraints.
+\textbf{TD3 use case:} Deterministic dynamics, sample efficiency critical, faster convergence, tight computational constraints.
 
 \subsubsection{Other Actor-Critic Variants}
 
@@ -611,53 +613,58 @@ Emerging quantum-inspired approaches \cite{Shen2024} demonstrate improved perfor
 
 \subsection{Safety-Constrained Reinforcement Learning}
 
-A critical challenge for deploying DRL controllers in power systems is ensuring safety during both training (exploration) and deployment. Standard DRL algorithms including DDPG and TD3 rely on unconstrained exploration that may produce actions violating operational limits---potentially causing equipment damage or grid instability. Recent reviews \cite{Waghmare2025, Li2024} identify safe RL as an emerging research priority for power system applications. Approaches include constrained Markov decision processes (CMDPs) with Lagrangian relaxation to enforce voltage and frequency limits, barrier function-based reward shaping that penalizes proximity to constraint boundaries, and physics-constrained architectures such as the physics-constrained TD3 demonstrated by Zholtayev et al. (2024) \cite{PhysicsConstrainedTD32024} for DFIG virtual inertia control, which integrates quadratic programming constraints directly into the TD3 framework. Despite these advances, formal safety guarantees for DRL controllers in grid-connected renewable systems remain an open problem, particularly for the tightly coupled dynamics of DFIG-PV hybrid systems.
+A critical challenge for deploying DRL controllers in power systems is ensuring safety during both training and deployment. Standard DRL algorithms including DDPG and TD3 rely on unconstrained exploration that may produce actions violating operational limits potentially causing equipment damage or grid instability. Recent reviews \cite{Waghmare2025, Li2024} identify safe RL as an emerging research priority for power system applications. Approaches include constrained Markov decision processes (CMDPs) with Lagrangian relaxation to enforce voltage and frequency limits, barrier function-based reward shaping that penalizes proximity to constraint boundaries, and physics-constrained architectures such as the physics-constrained TD3 demonstrated by Zholtayev et al. (2024) \cite{PhysicsConstrainedTD32024} for DFIG virtual inertia control. Despite these advances, formal safety guarantees for DRL controllers in grid-connected renewable systems remain an open problem, particularly for the tightly coupled dynamics of DFIG-PV hybrid systems.
 
 \subsection{Simulation-to-Real Transfer Challenges}
 
-While DRL controllers achieve strong performance in simulation environments, bridging the gap to real-world deployment remains a significant challenge \cite{Ejiyi2025}. Key issues include: (i) model fidelity---simulation models may not capture all parasitic effects, switching transients, and sensor noise present in physical hardware; (ii) computational latency---neural network inference must meet real-time constraints (typically < 100 $\mu$s for power electronic control loops); and (iii) distribution shift---operating conditions encountered in deployment may differ from training distributions. Hardware-in-the-loop (HIL) testing platforms such as OPAL-RT provide an intermediate validation step between pure simulation and field deployment, enabling real-time execution with realistic signal conditioning and communication delays \cite{Pandey2022PIICON}. However, systematic methodologies for sim-to-real transfer of DRL controllers in power systems---including domain randomization, online adaptation, and robustness certification---remain largely unexplored.
+While DRL controllers achieve strong performance in simulation environments, bridging the gap to real-world deployment remains a significant challenge \cite{Ejiyi2025}. Key issues include: (i) model fidelity---simulation models may not capture all parasitic effects, switching transients, and sensor noise present in physical hardware; (ii) computational latency---neural network inference must meet real-time constraints (typically < 100 $\mu$s for power electronic control loops); and (iii) distribution shift---operating conditions encountered in deployment may differ from training distributions. Hardware-in-the-loop (HIL) testing platforms such as OPAL-RT provide an intermediate validation step between pure simulation and field deployment, enabling real-time execution with realistic signal conditioning and communication delays \cite{Pandey2022PIICON}. However, systematic methodologies for simulation to real transfer of DRL controllers in power systems remains largely unexplored.
 
 \subsection{Summary of DRL Approaches for Power Systems}
 
-Recent comprehensive reviews \cite{Li2024, Tang2024, Waghmare2025} identify several fundamental advantages of deep reinforcement learning for DFIG-PV hybrid systems. Unlike model predictive control (MPC) \cite{Joshal2023, Kamal2022}, DRL directly learns optimal policies from nonlinear system dynamics without requiring linearization or explicit system models. DRL controllers trained with diverse operating conditions demonstrate robust performance across parameter uncertainties inherent in renewable energy systems including turbine inertia variations, PV array degradation, and grid impedance changes \cite{Ejiyi2025}. Actor-critic methods naturally handle continuous control signals such as rotor-side converter voltages and grid-side converter modulation indices without discretization artifacts \cite{Lillicrap2015, Fujimoto2018}. Reward function design enables simultaneous optimization of multiple conflicting objectives including power maximization, grid stability, THD minimization, and fault ride-through capability \cite{Frutos2025}.
+Recent comprehensive reviews \cite{Li2024, Tang2024, Waghmare2025} identify several fundamental advantages of deep reinforcement learning for DFIG-PV hybrid systems. Unlike model predictive control (MPC) \cite{Joshal2023, Kamal2022}, DRL directly learns optimal policies from nonlinear system dynamics without requiring linearization or explicit system models. DRL controllers trained with diverse operating conditions demonstrate robust performance across parameter uncertainties inherent in renewable energy systems including turbine inertia variations, PV array degradation, and grid impedance changes \cite{Ejiyi2025}. Actor-critic methods naturally handle continuous control signals such as rotor-side converter voltages and grid-side converter modulation indices without discretization artifacts \cite{Lillicrap2015, Fujimoto2018}. Reward function design enables simultaneous optimization of multiple conflicting objectives including power maximization, grid stability, and fault ride-through capability \cite{Frutos2025}.
 
 These advantages position TD3 and DDPG as promising alternatives to traditional PI/PID cascades and model-based controllers for next-generation hybrid renewable energy systems \cite{Sofian2024, AbdulMajeed2025}.
 
 % ============================================================================
 \section{Research Gaps and Opportunities}
 
-\subsection{Identified Critical Gaps}
+\subsection{Identified Research Gaps}
 
 
 
 \subsubsection{Gap 1: Unified Control of Tightly Coupled Systems}
 
-\textbf{Current:} Focus on single sources (wind or solar), limited DFIG-PV coupling investigation. Separate subsystem controllers with coordination layers (suboptimal). Unified frameworks rare.
+\textbf{Current State :} 
+\begin{itemize}
+    \item Focus are on single sources wind or solar with limited DFIG-PV coupling investigation. 
+    \item Separate subsystem controllers with coordination layers (suboptimal).
+    \item Limited adoption of Unified frameworks.
+\end{itemize}
 
 \textbf{Challenge:} Strong coupling: PV→DC link→rotor converter→stator power; GSC balances both sources.
 
-\textbf{Opportunity:} Unified RL observes all states, coordinates actions, optimizes overall performance, learns coupling implicitly.
+\textbf{Opportunity:} Unified RL agent observes all states, coordinates actions, optimizes overall performance, learns coupling implicitly.
 
-\subsubsection{Gap 2: Comprehensive DRL Algorithm Comparison}
+\subsubsection{Gap 2: DRL Algorithm Comparison}
 
-\textbf{Current:} Comparisons mostly vs PI baselines, limited DRL head-to-head under identical conditions. Inconsistent metrics/systems hinder fair comparisons.
+\textbf{Current State:} Comparisons mostly exist with PI baselines, there are limited DRL comparisons under identical conditions. 
 
-\textbf{Missing:} DDPG vs TD3 on identical systems, overestimation bias quantification, training efficiency (sample/time), robustness under variations, computational cost (training/deployment).
+\textbf{Opportunity:} Performance comparison of DDPG vs TD3 on identical systems
 
 
-\subsection{Research Opportunities Addressed in This Thesis}
+\subsection{Research Opportunities Addressed}
 
 \subsubsection{Opportunity 1: Unified Control Framework}
 
 Single unified TD3 controller managing RSC, GSC, and PV simultaneously. Learns coupled dynamics end-to-end, eliminates coordination layer, optimizes overall performance. 11-D state: $i_{qs}$, $i_{ds}$, $i_{qr}$, $i_{dr}$, $v_{dc}$, $i_{pv}$, $P_s$, $Q_s$, $P_g$, $Q_g$, $\theta_r$.
 
-\subsubsection{Opportunity 2: Comprehensive DDPG vs. TD3 Comparison}
+\subsubsection{Opportunity 2: Detailed DDPG vs. TD3 Comparison}
 
-Rigorous side-by-side comparison on identical DFIG-PV system (same reward, state, action spaces). Consistent metrics, training efficiency analysis, systematic robustness testing. Quantifies overestimation bias reduction, analyzes individual TD3 innovations, computational cost breakdown, deployment considerations.
+Side-by-side comparison on identical DFIG-PV system with same reward, state, action spaces.
 
 \subsubsection{Opportunity 3: Hardware-in-Loop Validation}
 
-OPAL-RT HIL validation: microsecond switching dynamics, realistic constraints, sensor noise/quantization/delays. Extends beyond simulation, demonstrates real-time feasibility, identifies implementation challenges, provides deployment confidence.
+OPAL-RT HIL validation: 10 microsecond switching dynamics, realistic constraints, demonstrates real-time feasibility and identifies implementation challenges.
 
 
 

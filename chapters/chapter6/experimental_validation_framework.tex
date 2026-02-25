@@ -11,28 +11,27 @@
 \subsection{Platform Architecture and Specifications}
 \label{subsec:platform_architecture}
 
-The experimental validation of the proposed deep reinforcement learning controllers was conducted using the OPAL-RT OP5700 real-time digital simulator, which provides state-of-the-art Hardware-in-Loop (HIL) capabilities for power electronic systems \cite{Zhen2025}. This platform enables the execution of complex power system models in real-time, allowing for accurate validation of control algorithms before deployment in actual systems. Recent advances in online multi-agent DRL platforms demonstrate that OPAL-RT HIL systems with EtherCAT communication protocols enable distributed real-time dynamic control validation with microsecond-level synchronization—critical for validating fast-acting DRL controllers in power systems.
+The experimental validation of the proposed deep reinforcement learning controllers was conducted using the OPAL-RT OP4510 real-time digital simulator, which provides Hardware-in-Loop (HIL) capabilities for power electronic systems\cite{Zhen2025}. This platform enables complex power system simulation in real-time, allowing for  validation of control algorithms before deployment in actual systems.
 
 \subsubsection{Hardware Specifications}
 
-The OPAL-RT OP5700 system employed for this research features the following technical specifications:
+The OPAL-RT OP4510 system employed for this research features the following technical specifications:
 
 \begin{table}[h]
 \centering
-\caption{OPAL-RT OP5700 Hardware Specifications}
+\caption{OPAL-RT OP4510 Hardware Specifications}
 \label{tab:opal_rt_specs}
 \begin{tabular}{|l|l|}
 \hline
 \textbf{Component} & \textbf{Specification} \\
 \hline
-Processor & Intel Xeon E5-2667 v4 (8 cores, 3.2 GHz) \\
-RAM & 32 GB DDR4 ECC \\
-Real-time OS & RedHawk Linux 7.3 \\
-FPGA & Xilinx Kintex-7 XC7K325T \\
-Analog I/O & 32 channels (16-bit, ±10V) \\
-Digital I/O & 64 channels (TTL/LVDS) \\
+Processor & Intel corei7 8 cores, 3.2 GHz\\
+RAM & 16 GB DDR4 ECC \\
+Real-time OS & RedHawk Linux  \\
+Analog I/O & 16 channels  \\
+Digital I/O & 16 channels \\
 Sampling frequency & Up to 100 kHz \\
-Communication & Ethernet, PCIe, Aurora \\
+Communication & Ethernet \\
 \hline
 \end{tabular}
 \end{table}
@@ -40,43 +39,39 @@ Communication & Ethernet, PCIe, Aurora \\
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{images/opalrt.png}
-    \caption{OPAL-RT OP5700 real-time digital simulator platform used for hardware-in-the-loop (HIL) validation of DDPG and TD3 controllers. The system features Intel Xeon E5-2667 v4 processor with 8 cores running RedHawk Linux 7.3 RTOS, providing deterministic real-time execution with 1 ms sampling time for comprehensive experimental validation of the hybrid DFIG-Solar PV system}
+    \caption{OPAL-RT OP4510 real-time digital simulator platform used for hardware-in-the-loop (HIL) validation}
     \label{fig:opalrt_platform}
 \end{figure}
 
-\subsubsection{Real-Time Operating System}
 
-The RedHawk Linux real-time operating system ensures deterministic execution of the power system model with guaranteed timing constraints. Key features include deterministic scheduling through priority-based preemptive scheduling with microsecond-level timing accuracy, memory locking to prevent page faults during real-time execution, optimized interrupt handling with interrupt service routines designed for minimal latency, and CPU isolation that dedicates specific cores for real-time tasks separate from operating system operations.
 
 \subsubsection{RT-LAB Software Environment}
 
-The RT-LAB software version 11.3 provides the development and execution environment for real-time simulation, offering automatic code generation from Simulink models for streamlined model compilation, intelligent partitioning of the system model across processor cores for optimal multi-core distribution, live visualization of signals and system states for real-time monitoring, high-speed recording of all system variables for comprehensive data acquisition, and online modification of controller parameters for flexible parameter tuning during simulation.
+The RT-LAB software provides the development and execution environment for real-time simulation, offering automatic code generation from Simulink models for model compilation, intelligent partitioning of the system model across processor cores for optimal multi-core distribution, live visualization of signals and system states for real-time monitoring. It also records all system variables for data acquisition, and allows online modification of controller parameters for parameter tuning during simulation.
 
 \subsection{System Integration and Configuration}
 \label{subsec:system_integration}
 
 \subsubsection{Simulation Time Step Selection}
 
-A critical parameter in real-time HIL simulation is the selection of the appropriate time step. For this research, a fixed time step of \textbf{1 millisecond (1 kHz)} was chosen based on several key considerations. First, power electronic switching dynamics require that the time step be at least 10 times smaller than the PWM switching period (10 kHz carrier frequency) to accurately represent converter dynamics. Second, the computational burden must be manageable, ensuring the complete DFIG-Solar PV model with neural network controllers executes within the 1 ms window across all processor cores. Third, control bandwidth requirements are satisfied as the 1 kHz sampling rate provides sufficient bandwidth (up to approximately 500 Hz) to capture the dominant dynamics of the electromechanical system. Fourth, real-time constraints are met as extensive profiling confirmed that the maximum computation time per step was 780 μs, leaving a 22\% safety margin.
+A critical parameter in real-time HIL simulation is the selection of the appropriate time step. For this research, a fixed time step of \textbf{10 microseconds} was chosen because of several reasons. First, power electronic switching dynamics require that the time step be at least 10 times smaller than the PWM switching period (10 kHz carrier frequency) to accurately represent converter dynamics. Second, the computational burden must be manageable, ensuring the complete DFIG-Solar PV model with neural network controllers gets executed within the 1 ms window across all processor cores.
 
 \subsubsection{Model Partitioning Strategy}
-
 The complete system model was partitioned across multiple CPU cores to meet real-time execution requirements:
 
 \begin{table}[h]
 \centering
 \caption{Multi-Core Model Partitioning}
 \label{tab:model_partitioning}
-\begin{tabular}{|l|l|l|}
+\begin{tabular}{|l|l|}
 \hline
-\textbf{CPU Core} & \textbf{Subsystem} & \textbf{Avg. Load (\%)} \\
+\textbf{CPU Core} & \textbf{Subsystem} \\
 \hline
-Core 1 (Master) & Main control loop, I/O handling & 68 \\
-Core 2 (Compute) & DFIG electrical model & 72 \\
-Core 3 (Compute) & Solar PV model, DC link dynamics & 45 \\
-Core 4 (Compute) & Neural network evaluation (Actor) & 58 \\
-Core 5 (Compute) & Grid model, measurements & 41 \\
-Core 6-8 & Reserved for OS operations & <10 \\
+Core 1 (Master) & Main control loop, I/O handling  \\
+Core 2 (Compute) & DFIG electrical model  \\
+Core 3 (Compute) & Solar PV model, DC link dynamics \\
+Core 4 (Compute) & Neural network evaluation (Actor) 
+\\
 \hline
 \end{tabular}
 \end{table}
@@ -104,8 +99,6 @@ The trained neural network parameters were extracted from TensorFlow/Keras using
                       'W3': actor_weights[4], 
                       'b3': actor_weights[5]})
     \end{verbatim}
-    
-    \item \textbf{Verification:} Test inputs were processed in Python and MATLAB to verify numerical equivalence (error < $10^{-12}$)
 \end{enumerate}
 
 \subsubsection{Simulink Function Block Implementation}
@@ -115,105 +108,77 @@ Custom Simulink function blocks were created to implement the neural network for
 \begin{enumerate}
     \item \textbf{Layer 1 (Input):} Accepts 11-dimensional state vector $\mathbf{s}$
     
-    \item \textbf{Hidden Layer 1:} Computes $\mathbf{h}_1 = \text{ReLU}(W_1 \mathbf{s} + b_1)$ with 400 neurons
-    
-    \item \textbf{Hidden Layer 2:} Computes $\mathbf{h}_2 = \text{ReLU}(W_2 \mathbf{h}_1 + b_2)$ with 300 neurons
+    \item \textbf{Hidden layers are created with dimension as per training}
     
     \item \textbf{Output Layer:} Computes $\mathbf{a} = \tanh(W_3 \mathbf{h}_2 + b_3)$ producing 4 control signals
     
     \item \textbf{Action scaling:} Maps normalized actions $[-1, 1]$ to physical voltage limits
 \end{enumerate}
 
-The ReLU activation function was implemented as:
-\begin{equation}
-\text{ReLU}(x) = \max(0, x)
-\label{eq:relu_implementation}
-\end{equation}
+\section{Controller Configurations}
+\label{subsec:controller_configs}
 
-And the tanh activation as:
-\begin{equation}
-\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
-\label{eq:tanh_implementation}
-\end{equation}
+Three distinct controller implementations were evaluated under identical test conditions to ensure fair comparison:
 
-\subsubsection{Computational Optimization}
+\subsubsection{PI Controller (Baseline)}
 
-Several optimizations were applied to ensure real-time execution. Matrix operations utilized Intel MKL (Math Kernel Library) for optimized BLAS operations, while memory allocation employed pre-allocated arrays to avoid dynamic memory operations during runtime. Data type optimization used single-precision (float32) instead of double-precision where applicable to reduce memory bandwidth requirements, and critical functions were inlined to reduce function call overhead.
+\textbf{Configuration:}
 
-These optimizations reduced the neural network evaluation time from 124 μs to 58 μs per time step.
+The PI controller baseline utilizes the tuning method considering the control bandwidth followed by manual fine-tuning to optimize performance. The control structure employs cascaded loops with inner current control and outer power/voltage control. The system consists of 8 independent PI controllers configured as follows:
+\begin{enumerate}
+    \item RSC d-axis current control: $K_p = 0.8$, $K_i = 50$
+    \item RSC q-axis current control: $K_p = 0.8$, $K_i = 50$
+    \item RSC active power control: $K_p = 0.02$, $K_i = 2$
+    \item RSC reactive power control: $K_p = 0.02$, $K_i = 2$
+    \item GSC d-axis current control: $K_p = 1.2$, $K_i = 80$
+    \item GSC q-axis current control: $K_p = 1.2$, $K_i = 80$
+    \item GSC DC voltage control: $K_p = 0.15$, $K_i = 15$
+    \item GSC reactive power control: $K_p = 0.02$, $K_i = 2$
+\end{enumerate}
+Anti-windup protection is implemented using the back-calculation method to prevent integral saturation.
 
-\section{Comprehensive Test Scenarios}
+\subsubsection{DDPG Controller}
+
+\textbf{Configuration:}
+
+The DDPG controller employs a network architecture of [11]-[400]-[300]-[4] (input-hidden1-hidden2-output), trained over 2000 episodes with actor learning rate $\alpha_{actor} = 1 \times 10^{-4}$ and critic learning rate $\alpha_{critic} = 1 \times 10^{-3}$. The discount factor is set to $\gamma = 0.99$, utilizing a single critic network (single Q-network) and Ornstein-Uhlenbeck noise for exploration during training.
+
+\subsubsection{TD3 Controller (Proposed)}
+
+\textbf{Configuration:}
+
+The TD3 controller employs a network architecture of [11]-[400]-[300]-[4] identical to DDPG for fair comparison, trained over 2500 episodes with actor learning rate $\alpha_{actor} = 8 \times 10^{-5}$ and critic learning rate $\alpha_{critic} = 7.5 \times 10^{-4}$. The discount factor is set to $\gamma = 0.99$, utilizing two independent critic networks (twin Q-networks). The policy delay parameter is $d = 2$ meaning the actor is updated every 2 critic updates, and target policy smoothing uses parameters $\sigma = 0.2$ and $c = 0.5$.
+
+
+
+
+\section{Test Scenarios}
 \label{sec:test_scenarios}
 
-\subsection{Test Scenario Design Rationale}
+\subsection{Test Scenario Design Objective}
 \label{subsec:scenario_design}
 
-The experimental validation employed a comprehensive suite of test scenarios designed to evaluate controller performance under diverse operating conditions. The scenarios were selected to cover transient response through step changes in renewable inputs, dynamic tracking with ramp changes and realistic profiles, disturbance rejection under grid voltage variations, multi-objective performance including simultaneous power and voltage regulation, and extreme conditions encompassing both near-rated and low-power operation.
+The experimental validation was done using multiple test scenarios to evaluate controller's performance under various possible operating conditions. The scenarios were selected to cover the transient response by step changes in solar PV and wind turbine inputs, tracking with ramp changes and realistic profiles, multi-objective performance including simultaneous power and voltage regulation, and extreme conditions with both near-rated and low-power operation.
 
 \subsection{Scenario 1: Simultaneous Step Changes}
 \label{subsec:scenario_step}
 
-\textbf{Objective:} Evaluate transient response to abrupt changes in both renewable sources.
+\textbf{Objective:} It evaluates transient response to abrupt changes in both renewable sources.
 
 \textbf{Test procedure:}
 \begin{enumerate}
     \item Initialize system at steady state: Wind speed = 10 m/s, PV current = 0 A
-    \item At $t = 5$ s, apply simultaneous step changes to both renewable sources: Solar PV current from 0 A to 5 A (corresponding to irradiance change from 0 to 1000 W/m²) and wind speed from 10 m/s to 11.2 m/s (a 12\% increase)
-    \item Record system response for 10 seconds
-    \item Measure: response time, overshoot, settling time, DC link voltage deviation
+    \item At $t = 5$ s, apply simultaneous step changes to both renewable sources: Solar PV current from 0 A to 5 A ,corresponding to an irradiance change from 0 to 1000 W/m² and wind speed from 10 m/s to 11.2 m/s.
+    \item simulate system for 10 seconds
+    \item Measurements done: response time, overshoot, settling time, DC link voltage deviation are determined from the current and voltage waveforms.
 \end{enumerate}
 
 \textbf{Expected outcomes:}
 
-The TD3 controller is expected to maintain DC link voltage within ±5\% of the 230 V reference, minimize power overshoot compared to both PI and DDPG controllers, and achieve the fastest settling time among the three control approaches.
+The controller is expected to maintain DC link voltage within ±5\% of the 230 V reference, minimize power overshoot compared to both PI and DDPG controllers, and achieve the fastest settling time among the three control approaches.
 
-\subsection{Scenario 2: Realistic Wind and Solar Profiles}
-\label{subsec:scenario_realistic}
 
-\textbf{Objective:} Evaluate performance under realistic time-varying renewable conditions.
 
-\textbf{Test procedure:}
-\begin{enumerate}
-    \item Apply wind speed profile based on Van der Hoven spectrum (30-minute duration)
-    \item Apply solar irradiance profile with cloud transients (30-minute duration)
-    \item Measure cumulative performance metrics including average DC link voltage deviation (RMSE), total energy harvested from both sources, and power quality indices (THD, voltage stability)
-\end{enumerate}
-
-\subsection{Scenario 3: Grid Voltage Disturbances}
-\label{subsec:scenario_grid}
-
-\textbf{Objective:} Test robustness to grid-side disturbances.
-
-\textbf{Test procedure:}
-\begin{enumerate}
-    \item Introduce ±10\% voltage sag/swell at grid connection point
-    \item Duration: 500 ms (typical utility disturbance)
-    \item Measure: fault ride-through capability, reactive power response
-\end{enumerate}
-
-\subsection{Scenario 4: Low-Power Operation}
-\label{subsec:scenario_low_power}
-
-\textbf{Objective:} Validate performance at low renewable resource availability.
-
-\textbf{Test procedure:}
-\begin{enumerate}
-    \item Wind speed: 6 m/s (cut-in speed)
-    \item Solar irradiance: 200 W/m² (cloudy conditions)
-    \item Verify stable operation and efficiency at low power levels
-\end{enumerate}
-
-\subsection{Scenario 5: Rated Power Operation}
-\label{subsec:scenario_rated}
-
-\textbf{Objective:} Test performance at maximum design power.
-
-\textbf{Test procedure:}
-\begin{enumerate}
-    \item Wind speed: 12 m/s (near-rated)
-    \item Solar irradiance: 1000 W/m² (clear sky)
-    \item Verify thermal limits, converter saturation handling
-\end{enumerate}
 
 \section{Performance Metrics and Validation Criteria}
 \label{sec:performance_metrics}
@@ -278,227 +243,381 @@ t_{rise} = t_{90\%} - t_{10\%}
 
 \textbf{Acceptance criterion:} $t_{rise} < 50$ ms for rotor currents.
 
-\subsection{Secondary Performance Metrics}
 
-\subsubsection{Root Mean Square Error (RMSE)}
+% ============================================================
+% COMPREHENSIVE EXPERIMENTAL VALIDATION RUNS
+% ============================================================
 
-For continuous tracking performance evaluation:
+\section{Experimental Validation Runs}
+\label{sec:experimental_runs}
 
-\begin{equation}
-\text{RMSE} = \sqrt{\frac{1}{N}\sum_{i=1}^{N}(y_i - y_{ref,i})^2}
-\label{eq:rmse}
-\end{equation}
+This section presents experimental validation results from the OPAL-RT OP4510 HIL platform (Section~\ref{sec:opal_rt_platform}), validating controller performance across multiple operating scenarios.
 
-\subsubsection{Integral Absolute Error (IAE)}
+\subsection{Experimental Test Campaign Overview}
+\label{subsec:test_campaign_overview}
 
-Total accumulated error over the test duration:
+Five experimental runs validated different aspects of system behavior:
 
-\begin{equation}
-\text{IAE} = \int_0^T |y(t) - y_{ref}(t)| \, dt
-\label{eq:iae}
-\end{equation}
-
-\subsubsection{Total Harmonic Distortion (THD)}
-
-For power quality assessment:
-
-\begin{equation}
-\text{THD} = \frac{\sqrt{\sum_{n=2}^{\infty} I_n^2}}{I_1} \times 100\%
-\label{eq:thd}
-\end{equation}
-
-\textbf{Acceptance criterion:} THD $< 5\%$ per IEEE 519 standard.
-
-\section{Comparative Analysis Framework}
-\label{sec:comparative_framework}
-
-\subsection{Controller Configurations}
-\label{subsec:controller_configs}
-
-Three distinct controller implementations were evaluated under identical test conditions to ensure fair comparison:
-
-\subsubsection{PI Controller (Baseline)}
-
-\textbf{Configuration:}
-
-The PI controller baseline utilizes the Ziegler-Nichols tuning method followed by manual fine-tuning to optimize performance. The control structure employs cascaded loops with inner current control and outer power/voltage control. The system consists of 8 independent PI controllers configured as follows:
-\begin{enumerate}
-    \item RSC d-axis current control: $K_p = 0.8$, $K_i = 50$
-    \item RSC q-axis current control: $K_p = 0.8$, $K_i = 50$
-    \item RSC active power control: $K_p = 0.02$, $K_i = 2$
-    \item RSC reactive power control: $K_p = 0.02$, $K_i = 2$
-    \item GSC d-axis current control: $K_p = 1.2$, $K_i = 80$
-    \item GSC q-axis current control: $K_p = 1.2$, $K_i = 80$
-    \item GSC DC voltage control: $K_p = 0.15$, $K_i = 15$
-    \item GSC reactive power control: $K_p = 0.02$, $K_i = 2$
-\end{enumerate}
-Anti-windup protection is implemented using the back-calculation method to prevent integral saturation.
-
-\subsubsection{DDPG Controller}
-
-\textbf{Configuration:}
-
-The DDPG controller employs a network architecture of [11]-[400]-[300]-[4] (input-hidden1-hidden2-output), trained over 2000 episodes with actor learning rate $\alpha_{actor} = 1 \times 10^{-4}$ and critic learning rate $\alpha_{critic} = 1 \times 10^{-3}$. The discount factor is set to $\gamma = 0.99$, utilizing a single critic network (single Q-network) and Ornstein-Uhlenbeck noise for exploration during training.
-
-\subsubsection{TD3 Controller (Proposed)}
-
-\textbf{Configuration:}
-
-The TD3 controller employs a network architecture of [11]-[400]-[300]-[4] identical to DDPG for fair comparison, trained over 2500 episodes with actor learning rate $\alpha_{actor} = 8 \times 10^{-5}$ and critic learning rate $\alpha_{critic} = 7.5 \times 10^{-4}$. The discount factor is set to $\gamma = 0.99$, utilizing two independent critic networks (twin Q-networks). The policy delay parameter is $d = 2$ meaning the actor is updated every 2 critic updates, and target policy smoothing uses parameters $\sigma = 0.2$ and $c = 0.5$.
-
-\subsection{Experimental Protocol}
-\label{subsec:experimental_protocol}
-
-To ensure reproducibility and statistical validity, the following protocol was strictly followed:
-
-\begin{enumerate}
-    \item \textbf{Initialization:} Each test began with identical initial conditions (wind speed = 9 m/s, PV current = 0 A)
-    
-    \item \textbf{Warm-up period:} 2-second stabilization before applying test disturbances
-    
-    \item \textbf{Test execution:} Each scenario executed 10 times per controller
-    
-    \item \textbf{Data recording:} All signals sampled at 1 kHz and saved to HDF5 format
-    
-    \item \textbf{Between-test reset:} System fully reset between trials to eliminate history effects
-    
-    \item \textbf{Statistical analysis:} Mean and standard deviation calculated across 10 trials
-\end{enumerate}
-
-\section{Data Acquisition and Processing}
-\label{sec:data_acquisition}
-
-\subsection{Measured Variables and Instrumentation}
-\label{subsec:measured_variables}
-
-The OPAL-RT system provided comprehensive measurement capabilities for all system variables:
-
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
-\caption{Measured Variables and Specifications}
-\label{tab:measured_variables}
+\caption{Experimental Validation Test Campaign}
+\label{tab:test_campaign}
 \begin{tabular}{|l|l|l|}
 \hline
-\textbf{Variable} & \textbf{Range} & \textbf{Resolution} \\
+\textbf{Run} & \textbf{Objective} & \textbf{Key Variables} \\
 \hline
-Stator currents ($i_{qs}, i_{ds}$) & ±20 A & 0.01 A \\
-Rotor currents ($i_{qr}, i_{dr}$) & ±30 A & 0.01 A \\
-DC link voltage ($v_{dc}$) & 0-400 V & 0.1 V \\
-PV current ($i_{pv}$) & 0-10 A & 0.01 A \\
-PV power ($P_{pv}$) & 0-1000 W & 1 W \\
-Stator active power ($P_s$) & 0-10 kW & 10 W \\
-Stator reactive power ($Q_s$) & ±5 kVAR & 10 VAR \\
-Grid active power ($P_g$) & 0-10 kW & 10 W \\
-Grid reactive power ($Q_g$) & ±5 kVAR & 10 VAR \\
-Wind speed ($v_w$) & 0-15 m/s & 0.1 m/s \\
-Rotor speed ($\omega_r$) & 0-2000 rpm & 1 rpm \\
-Rotor angle ($\theta_r$) & 0-360° & 0.1° \\
+Run 1 & DFIG baseline without solar PV & $P_{rotor}$, $V_{dc}$, $P_{grid}$, $P_{dc}$ \\
+Run 2 & DFIG with solar PV integration & $P_{solar}$, $I_{solar}$, $V_{dc}$, $P_{grid}$, $P_{rotor}$ \\
+Run 3 & Comparative analysis (Run 1 vs Run 2) & $\Delta P_{grid}$, $\Delta V_{dc}$, power flow \\
+Run 4 & Multi-scenario wind and solar variations & Dynamic response, transients \\
+Run 5 & Combined disturbances & Coupled dynamics, robustness \\
 \hline
 \end{tabular}
 \end{table}
 
-\subsection{Data Processing Pipeline}
-\label{subsec:data_processing}
+All experiments used identical initial conditions (wind speed = 9 m/s, steady-state) for reproducibility.
 
-Raw data from OPAL-RT underwent the following processing steps:
+\subsection{Run 1: DFIG Baseline Performance Without Solar PV}
+\label{subsec:run1_baseline}
 
-\subsubsection{Noise Filtering}
+Run 1 established baseline DFIG performance ($I_{solar} = 0$ A) with wind speed 10--11.5 m/s, operating in both subsynchronous and supersynchronous modes.
 
-High-frequency switching noise was removed using a 4th-order Butterworth low-pass filter:
-
+\textbf{Power Flow:} Subsynchronous: Grid $\rightarrow$ GSC $\rightarrow$ RSC $\rightarrow$ Rotor. Supersynchronous: bidirectional. Grid power managed DC link balance:
 \begin{equation}
-H(s) = \frac{\omega_c^4}{(s^2 + 1.848\omega_c s + \omega_c^2)(s^2 + 0.765\omega_c s + \omega_c^2)}
-\label{eq:butterworth_filter}
+P_{grid} = P_{rotor,dc} + P_{losses} - P_{pv}
+\label{eq:run1_power_balance}
+\end{equation}
+where $P_{pv} = 0$ for Run 1. DC link voltage maintained acceptable regulation with transient characteristics varying by controller type.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run1_M3_RotorCurrent.png}
+        \caption{Rotor current response (three-phase)}
+        \label{fig:run1_rotor_current}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run1_M4_Powers.png}
+        \caption{Power measurements: $P_{rotor}$ (yellow), $P_{grid}$ (blue), $P_{dc}$ (magenta)}
+        \label{fig:run1_powers}
+    \end{subfigure}
+    \caption{Run 1 baseline performance without solar PV}
+    \label{fig:run1_results}
+\end{figure}
+
+\textbf{Key Observations:} Grid must supply all DC link power during subsynchronous operation. Controller performance differences (PI, DDPG, TD3) observable in transient response and voltage regulation accuracy.
+
+\subsection{Run 2: DFIG Performance With Solar PV Integration}
+\label{subsec:run2_integrated}
+
+Run 2 evaluated solar PV integration effects with $I_{solar} = 50$ A at the DC link, using the same wind profile as Run 1.
+
+\textbf{Modified Power Balance:}
+\begin{equation}
+C\frac{dV_{dc}}{dt} = i_{pv} + i_{r,dc} - i_{g,dc}
+\label{eq:run2_dc_balance}
+\end{equation}
+\begin{equation}
+P_{grid,new} = P_{grid,baseline} - P_{solar}
+\label{eq:run2_grid_reduction}
 \end{equation}
 
-with cutoff frequency $\omega_c = 2\pi \times 200$ rad/s (200 Hz).
+With $I_{solar} = 50$ A: $P_{solar} = V_{dc} \times I_{solar} \approx 230$ V $\times$ 50 A = 11.5 kW.
 
-\subsubsection{Performance Metric Calculation}
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run2_M1_PSolar.png}
+        \caption{Solar power injection: $I_{solar}$ (blue), $P_{solar}$ (yellow), $V_{dc}$ (magenta)}
+        \label{fig:run2_solar}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run2_M2_Powers.png}
+        \caption{System powers with solar: $P_{rotor}$ (yellow), $P_{grid}$ (blue), $P_{dc}$ (magenta)}
+        \label{fig:run2_powers}
+    \end{subfigure}
+    \caption{Run 2 performance with solar PV integration}
+    \label{fig:run2_results}
+\end{figure}
 
-Automated MATLAB scripts computed all metrics defined in Section \ref{sec:performance_metrics} using peak detection algorithms for overshoot measurement, steady-state value estimation using the final 10\% of data, numerical integration for IAE calculation, and FFT analysis for THD computation.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth, height=8cm]{images/Run2_M3_RotorCurrent.png}
+    \caption{Run 2 three-phase rotor current response with solar PV integration}
+    \label{fig:run2_rotor_current}
+\end{figure}
 
-\subsubsection{Statistical Analysis}
+\textbf{Key Observations:} Solar PV did not affect $P_{rotor}$ (remains wind-determined). Enhanced DC link voltage stability. Grid power offset: $P_{grid,Run2} \approx P_{grid,Run1} - P_{solar}$, transforming from grid import to potential export. TD3 demonstrated superior management of coupled solar-grid dynamics.
 
-For each metric across 10 trials:
+\subsection{Run 3: Comparative Analysis - Baseline vs. Solar-Integrated}
+\label{subsec:run3_comparative}
+
+Run 3 systematically compared baseline (Run 1) and solar-integrated (Run 2) performance, quantifying solar PV integration benefits.
+
+\textbf{Rotor Power:} $P_{rotor,Run2} \approx P_{rotor,Run1}$, validating independent wind energy extraction.
+
+\textbf{Grid Power:}
+\begin{table}[htbp]
+\centering
+\caption{Grid Power Comparison: Run 1 vs Run 2}
+\label{tab:run3_grid_comparison}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Run 1 (No Solar)} & \textbf{Run 2 (With Solar)} & \textbf{Change} \\
+\hline
+Wind Speed & 10 $\rightarrow$ 11.5 m/s & 10 $\rightarrow$ 11.5 m/s & - \\
+$I_{solar}$ & 0 A & 50 A & +50 A \\
+$P_{solar}$ & 0 kW & 11.5 kW & +11.5 kW \\
+$P_{grid}$ (typical) & -8 to -5 kW & +3 to +6 kW & $\approx$ +11 kW \\
+\hline
+\end{tabular}
+\end{table}
+
+Negative-to-positive $P_{grid}$ transition indicates transformation from grid import to export mode.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run1_M4_Powers.png}
+        \caption{Run 1: Without solar PV - $P_{grid}$ oscillates around 0}
+        \label{fig:run3_without_solar}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run2_M2_Powers.png}
+        \caption{Run 2: With solar PV - $P_{grid}$ reduced significantly}
+        \label{fig:run3_with_solar}
+    \end{subfigure}
+    \caption{Run 3 comparative analysis}
+    \label{fig:run3_comparison}
+\end{figure}
+
+\textbf{Voltage Regulation:}
+\begin{table}[htbp]
+\centering
+\caption{DC Link Voltage Regulation Comparison}
+\label{tab:run3_voltage_comparison}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Controller} & \textbf{Run 1: $\Delta V_{dc}$ (\%)} & \textbf{Run 2: $\Delta V_{dc}$ (\%)} & \textbf{Improvement} \\
+\hline
+PI Controller & $\pm 5.0$ & $\pm 4.2$ & 16\% \\
+DDPG Controller & $\pm 4.8$ & $\pm 4.0$ & 17\% \\
+TD3 Controller & $\pm 4.6$ & $\pm 3.8$ & 17\% \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Key Insights:} Solar assists voltage stability, rotor-side operation remains independent, grid dependency reduced (import $\rightarrow$ export), and TD3 maintains performance advantage.
+
+\subsection{Run 4: Multi-Scenario Wind and Solar Variations}
+\label{subsec:run4_multiscenario}
+
+Run 4 tested controller adaptability across multiple operating scenarios:
+
+\begin{table}[htbp]
+\centering
+\caption{Run 4 Test Scenarios}
+\label{tab:run4_scenarios}
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Scenario} & \textbf{Wind Speed (m/s)} & \textbf{$I_{solar}$ (A)} & \textbf{Operating Mode} \\
+\hline
+M1 (Baseline) & 11.2 (fixed) & 0 $\rightarrow$ 30 $\rightarrow$ 50 & Supersynchronous \\
+M2 (Low Wind) & 10.0 & 0 $\rightarrow$ 30 & Subsynchronous \\
+M3 (High Wind) & 11.5 (fixed) & Variable ramp & Supersynchronous \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Scenario M1 (Solar Ramp, Fixed Wind):} With wind fixed at 11.2 m/s, $I_{solar}$ ramped 0 $\rightarrow$ 50 A. $V_{dc}$ remained remarkably constant despite 11.5 kW solar power increase. Rotor current unchanged. Grid power decreased proportionally: $\Delta P_{grid} \approx -\Delta P_{solar}$.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Run4_M1_Solar.png}
+    \caption{Run 4 Scenario M1: Solar current ramp response with fixed wind speed}
+    \label{fig:run4_m1}
+\end{figure}
+
+\textbf{Scenario M2 (Subsynchronous):} At 10.0 m/s wind ($N_r < N_s$), power flow: Grid $\rightarrow$ GSC $\rightarrow$ RSC $\rightarrow$ Rotor. Solar PV offset grid import, improved efficiency, enhanced voltage stability.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/Run4_M2_Powers.png}
+    \caption{Run 4 Scenario M2: Subsynchronous operation}
+    \label{fig:run4_m2}
+\end{figure}
+
+\textbf{Scenario M3 (High Wind, Variable Solar):} At 11.5 m/s with continuous solar variations, rotor-side maintained MPPT, voltage stability preserved despite high throughput, TD3 $>$ DDPG $>$ PI ranking maintained.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/Run4_M3_Rotor_Current.png}
+    \caption{Run 4 Scenario M3: Three-phase rotor current response under high wind (11.5 m/s) with variable solar irradiance}
+    \label{fig:run4_m3_rotor_current}
+\end{figure}
+
+\textbf{Summary:}
+\begin{table}[htbp]
+\centering
+\caption{Run 4 Key Findings Summary}
+\label{tab:run4_summary}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Finding} & \textbf{Implication} \\
+\hline
+Solar does not affect rotor power & Validates independent wind/solar control architecture \\
+DC voltage stability maintained & Confirms GSC control effectiveness across scenarios \\
+Grid power offset by solar & Demonstrates economic benefit of hybrid system \\
+Performance consistent across modes & Validates controller robustness in both sub/supersynchronous \\
+TD3 superiority maintained & Confirms TD3 advantages across operational envelope \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Run 5: Combined Wind and Solar Disturbances}
+\label{subsec:run5_combined}
+
+\subsubsection{Test Objective}
+
+Run 5 presented the most challenging scenario: simultaneous variations in both wind speed and solar irradiance, testing controller performance under realistic coupled disturbances representing actual field conditions.
+
+\textbf{Test Configuration:}
+\begin{itemize}
+    \item Time 0--5 s: Wind 10 m/s, $I_{solar} = 0$ A (baseline)
+    \item Time 5--10 s: Wind ramp to 11.2 m/s, $I_{solar}$ ramp to 30 A
+    \item Time 10--15 s: Hold wind at 11.2 m/s, $I_{solar}$ step to 50 A
+\end{itemize}
+
+\subsubsection{Coupled Dynamics Analysis}
+
+The simultaneous disturbances create complex coupled dynamics:
 
 \begin{equation}
-\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i, \quad s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}
-\label{eq:statistics}
+\frac{dV_{dc}}{dt} = f(v_w(t), G(t), \text{controller actions})
+\label{eq:run5_coupled}
 \end{equation}
 
-Results reported as: $\bar{x} \pm s$ (mean ± standard deviation).
+where both wind speed $v_w(t)$ and solar irradiance $G(t)$ (represented by $I_{solar}(t)$) vary simultaneously.
 
-\subsection{Data Validation and Quality Assurance}
-\label{subsec:data_validation}
-
-\subsubsection{Sanity Checks}
-
-All recorded data underwent automated validation to ensure data integrity. Physical limits were verified to confirm all variables remained within realistic bounds, power balance was checked to ensure $P_{pv} + P_{rotor} = P_{grid} + P_{losses}$ (within 5\% tolerance), energy conservation was verified through DC link energy balance calculations, and causality was confirmed to ensure effects followed causes temporally.
-
-\subsubsection{Outlier Detection}
-
-Trials with anomalous behavior were flagged using:
+\textbf{Power Balance Under Coupled Disturbances:}
 
 \begin{equation}
-|x_i - \text{median}(x)| > 3 \times \text{MAD}(x)
-\label{eq:outlier_detection}
+P_{grid}(t) = P_{rotor}(v_w(t)) - P_{solar}(G(t)) + P_{losses}
+\label{eq:run5_power_balance}
 \end{equation}
 
-where MAD is the median absolute deviation. Flagged trials were manually reviewed and re-run if necessary.
+Both $P_{rotor}$ and $P_{solar}$ vary simultaneously, requiring coordinated GSC and RSC control to maintain system stability.
 
-\section{Safety and Operational Constraints}
-\label{sec:safety_constraints}
+\subsubsection{Controller Performance Comparison}
 
-\subsection{Hardware Protection Limits}
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run5_M1_Solar.png}
+        \caption{Solar variables during combined disturbances}
+        \label{fig:run5_solar}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run5_M2_Powers.png}
+        \caption{System powers under coupled wind-solar variations}
+        \label{fig:run5_powers}
+    \end{subfigure}
+    \\[1ex]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/Run5_M3_RotorCurrent.png}
+        \caption{Rotor current response to simultaneous disturbances}
+        \label{fig:run5_rotor}
+    \end{subfigure}
+    \caption{Run 5 combined wind and solar inputs}
+    \label{fig:run5_comparison}
+\end{figure}
 
-The following protection limits were implemented in the OPAL-RT model to prevent damage to simulated components: maximum rotor current of 1.5 × rated (18 A peak), maximum stator current of 1.3 × rated (10.4 A peak), DC link voltage limits between 180-280 V (±20\% of nominal), maximum rotor speed of 1.3 p.u. (super-synchronous limit), and maximum converter power of 110\% of rated for up to 10 seconds.
+\textbf{TD3 Controller Performance:}
 
-Violation of any limit triggered an automatic fault and controller shutdown.
+Under coupled disturbances, TD3 demonstrated exceptional performance:
+\begin{itemize}
+    \item DC voltage overshoot: < 5\%
+    \item Settling time: < 100 ms
+    \item No oscillations or instability
+    \item Smooth power transitions
+\end{itemize}
 
-\subsection{Software Watchdog Implementation}
+The twin-critic architecture and target policy smoothing (Equations~\ref{eq:clipped_double_q} and~\ref{eq:target_smoothing}) enabled TD3 to handle the complex multi-input disturbance scenario effectively.
 
-A software watchdog monitored controller execution health through four mechanisms: execution time monitoring that alerts if computation exceeds 900 μs (90\% of the time step), NaN detection that triggers immediate shutdown if any variable becomes NaN or Inf, oscillation detection that flags high-frequency oscillations exceeding 100 Hz, and runaway prevention that initiates emergency shutdown if control signals saturate for more than 100 ms.
+\textbf{DDPG Controller Performance:}
 
-\section{Validation Best Practices and Emerging Methodologies}
-\label{sec:validation_best_practices}
+DDPG showed good performance but with measurable degradation:
+\begin{itemize}
+    \item DC voltage overshoot: 5--7\%
+    \item Settling time: 110--120 ms
+    \item Minor oscillations during transients
+    \item Occasional aggressive control actions
+\end{itemize}
 
-The experimental validation framework presented in this chapter aligns with emerging best practices for DRL controller testing in renewable energy systems. Recent advances in real-time simulation methodologies demonstrate the importance of comprehensive validation strategies:
+The single-critic overestimation occasionally produced suboptimal actions during the most challenging transients.
 
-\textbf{Hybrid Energy Storage Validation:} DRL control strategies for hybrid energy storage systems \cite{Bae2024} emphasize the need for multiple operating scenario testing—including supercapacitors, batteries, and hydrogen storage—to validate power-sharing optimization across diverse energy storage technologies. This multi-scenario approach ensures robust controller performance under varying storage availability and grid conditions.
+\textbf{PI Controller Performance:}
 
-\textbf{Software-in-Loop for Wind Systems:} Real-time software-in-the-loop (SiL) validation of wind turbine controllers \cite{Guerreiro2024} using RTDS and GTSOC platforms highlights the importance of electromagnetic transient (EMT) modeling for capturing fast converter dynamics. The experiences from Type IV offshore wind turbine validation provide valuable insights for DFIG-based systems, particularly regarding fault ride-through capability testing and grid code compliance verification.
+PI control exhibited significant limitations:
+\begin{itemize}
+    \item DC voltage overshoot: 8--10\%
+    \item Settling time: 140--160 ms
+    \item Pronounced oscillations
+    \item Sluggish adaptation to disturbances
+\end{itemize}
 
-These methodologies reinforce the systematic validation approach adopted in this research, combining real-time HIL simulation with comprehensive test scenarios and rigorous performance metrics to ensure reliable DRL controller deployment.
+Fixed gains could not adequately respond to the coupled, nonlinear dynamics of simultaneous wind and solar variations.
 
-Having established the comprehensive experimental validation framework---including the OPAL-RT OP5700 HIL platform \cite{Zhen2025,Mangalapuri2025}, systematic test scenarios, rigorous performance metrics, and robust data acquisition procedures---the following sections present the performance evaluation results obtained using this framework. The quantitative comparison of PI, DDPG, and TD3 control approaches across all test scenarios is detailed below.
-% ============================================================
-% PERFORMANCE EVALUATION (merged from former Chapter A.6)
-% ============================================================
+\subsubsection{Quantitative Performance Metrics}
 
-\section{Training Convergence Analysis}
-\label{sec:training_convergence}
+\begin{table}[htbp]
+\centering
+\caption{Run 5 Performance Metrics - Combined Disturbances}
+\label{tab:run5_metrics}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Metric} & \textbf{PI} & \textbf{DDPG} & \textbf{TD3} \\
+\hline
+DC Voltage Overshoot (\%) & 8--10 & 5--7 & < 5 \\
+Settling Time (ms) & 140--160 & 110--120 & < 100 \\
+Steady-State Error (\%) & 1.5--2.0 & 0.8--1.2 & < 0.5 \\
+Power Tracking RMSE (W) & 450--550 & 280--350 & 180--240 \\
+\hline
+\end{tabular}
+\end{table}
 
-This section presents the training convergence characteristics for both DDPG and TD3 algorithms following the methodologies detailed in Sections~\ref{subsec:ddpg_training_config} and~\ref{subsec:td3_training_config}.
+The quantitative metrics confirm TD3's substantial performance advantages under the most demanding test conditions.
 
-\subsection{DDPG Training Convergence}
-\label{subsec:ddpg_training_convergence}
+\subsubsection{Run 5 Key Observations}
 
-The DDPG algorithm was trained using the single-critic architecture (Section~\ref{subsec:ddpg_critic}) with hyperparameters from Section~\ref{subsec:ddpg_hyperparameters}. Figure~\ref{fig:ddpg_training} shows the training convergence profile over 2000 episodes.
+\begin{enumerate}
+    \item \textbf{Solar PV maintains DC link stability:} Even under simultaneous wind variations, solar contribution helped maintain DC voltage within acceptable bounds
+    
+    \item \textbf{Coupled disturbances reveal controller limitations:} Combined disturbances exposed the weaknesses of PI control and occasional DDPG overestimation
+    
+    \item \textbf{TD3 robustness validated:} The superior performance of TD3 under coupled disturbances validates the theoretical advantages of twin-critic architecture and delayed policy updates
+    
+    \item \textbf{Real-world applicability:} Run 5 conditions most closely simulate actual field operation with variable wind and solar, demonstrating practical deployment viability
+\end{enumerate}
 
-\textbf{Key Characteristics:} The policy converged after approximately 1500 episodes with 8 hours training time on Google Colab's NVIDIA T4 GPU. The Ornstein-Uhlenbeck exploration process (Equation~\ref{eq:ou_process}) enabled effective state-action space exploration. The multi-objective reward function (Equations~\ref{eq:r_rsc} and~\ref{eq:r_gsc}) successfully balanced frequency tracking, power regulation, and voltage stability objectives.
 
-\textbf{Training Phases:} Phase 1 (Episodes 1--100): Random exploration populated the replay buffer (Equation~\ref{eq:replay_buffer}). Phase 2 (Episodes 101--800): Curriculum learning with staged reward functions. Phase 3 (Episodes 801--1500): Rapid improvement as the actor network (Equation~\ref{eq:actor_network}) learned effective policies. Phase 4 (Episodes 1501--2000): Fine-tuning with diminishing exploration noise.
+\section{Comparative Analysis Framework}
+\label{sec:comparative_framework}
 
-The single-critic architecture exhibited occasional instabilities due to value overestimation (Section~\ref{subsec:td3_motivation}), motivating the TD3 approach.
 
-\subsection{TD3 Training Convergence}
-\label{subsec:td3_training_convergence}
-
-The TD3 algorithm was trained using the twin-critic architecture (Section~\ref{subsec:td3_critics}) with hyperparameters from Section~\ref{subsec:td3_hyperparameters}. Figure~\ref{fig:td3_training} shows the convergence profile demonstrating the benefits of Section~\ref{subsec:td3_innovations} innovations.
-
-\textbf{Key Characteristics:} TD3 converged after approximately 2000 episodes with 12 hours training time (50\% increase over DDPG). The clipped double Q-learning (Equation~\ref{eq:clipped_double_q}) resulted in smoother convergence with fewer oscillations. Delayed policy updates ($d=2$, Equation~\ref{eq:delayed_updates}) improved stability by decoupling value and policy updates.
-
-\textbf{Comparison with DDPG:} TD3 required 33\% more episodes (2000 vs 1500) but achieved 40\% lower variance in episode rewards and 15\% higher cumulative reward in the final 100 episodes. The computational overhead (40\% increase, Section~\ref{subsec:computational_complexity}) is justified by superior deployed controller performance.
 
 \section{Dynamic Response Analysis}
 \label{sec:dynamic_response}
@@ -591,12 +710,12 @@ Figure~\ref{fig:rotor_current} illustrates rotor current response to simultaneou
 
 \textbf{Transient Analysis:} Initial phase (0--10 ms): TD3 rapid controlled response, DDPG slightly aggressive, PI slow with oscillations. Mid-transient (10--30 ms): TD3 smooth convergence, DDPG minor oscillations, PI persistent oscillations. Settling phase (30--50 ms): TD3 entered 2\% band at 34 ms, DDPG at 36 ms with minor deviations, PI at 40 ms.
 
-TD3's superior response attributes to: (1) conservative Q-estimates (Equation~\ref{eq:clipped_double_q}) preventing overshoots, (2) target smoothing (Equation~\ref{eq:target_smoothing}) ensuring generalization, (3) delayed updates (Equation~\ref{eq:delayed_updates}) providing stable critic-based learning.
+TD3's superior response attributes to: (1) conservative Q-estimates preventing overshoots, (2) target smoothing  ensuring generalization, (3) delayed updates providing stable critic-based learning.
 
 \section{Quantitative Performance Comparison}
 \label{sec:quantitative_comparison}
 
-This section presents comprehensive quantitative metrics validating DRL advantages (Chapter~\ref{chap:rl}) and TD3 innovations (Section~\ref{subsec:td3_innovations}).
+This section presents comprehensive quantitative metrics validating DRL advantages.
 
 \subsection{Overall System Performance}
 \label{subsec:overall_performance}
@@ -670,375 +789,6 @@ TD3 Controller & $\pm 4.6\%$ & 0.97--0.99 \\
 \textbf{Key Findings:} TD3 achieves tightest voltage regulation ($\pm 4.6$\%), 8\% better than PI ($\pm 5$\%) and 4.2\% better than DDPG ($\pm 4.8$\%). Both DRL controllers achieve 0.97--0.99 power factor versus 0.95--0.98 for PI, enabling better grid support. TD3 demonstrates fastest disturbance recovery and robust performance across 200--1000 W/m\textsuperscript{2} solar irradiance.
 
 Superior GSC performance relates to system architecture (Chapter~\ref{chap:modeling}): PV-DC link integration creates coupled dynamics (Equation~\ref{eq:vdc_dot}) requiring coordinated management of all power flows. The unified control approach manages interactions holistically, with learning-based optimization (Section~\ref{subsec:training_infrastructure}) enabling TD3 to discover optimal coordination without explicit mathematical models.
-
-% ============================================================
-% COMPREHENSIVE EXPERIMENTAL VALIDATION RUNS
-% ============================================================
-
-\section{Comprehensive Experimental Validation Runs}
-\label{sec:experimental_runs}
-
-This section presents experimental validation results from the OPAL-RT OP5700 HIL platform (Section~\ref{sec:opal_rt_platform}), validating controller performance across multiple operating scenarios.
-
-\subsection{Experimental Test Campaign Overview}
-\label{subsec:test_campaign_overview}
-
-Five experimental runs validated different aspects of system behavior:
-
-\begin{table}[htbp]
-\centering
-\caption{Experimental Validation Test Campaign}
-\label{tab:test_campaign}
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Run} & \textbf{Objective} & \textbf{Key Variables} \\
-\hline
-Run 1 & DFIG baseline without solar PV & $P_{rotor}$, $V_{dc}$, $P_{grid}$, $P_{dc}$ \\
-Run 2 & DFIG with solar PV integration & $P_{solar}$, $I_{solar}$, $V_{dc}$, $P_{grid}$, $P_{rotor}$ \\
-Run 3 & Comparative analysis (Run 1 vs Run 2) & $\Delta P_{grid}$, $\Delta V_{dc}$, power flow \\
-Run 4 & Multi-scenario wind and solar variations & Dynamic response, transients \\
-Run 5 & Combined disturbances & Coupled dynamics, robustness \\
-\hline
-\end{tabular}
-\end{table}
-
-All experiments used identical initial conditions (wind speed = 9 m/s, steady-state) for reproducibility.
-
-\subsection{Run 1: DFIG Baseline Performance Without Solar PV}
-\label{subsec:run1_baseline}
-
-Run 1 established baseline DFIG performance ($I_{solar} = 0$ A) with wind speed 10--11.5 m/s, operating in both subsynchronous and supersynchronous modes.
-
-\textbf{Power Flow:} Subsynchronous: Grid $\rightarrow$ GSC $\rightarrow$ RSC $\rightarrow$ Rotor. Supersynchronous: bidirectional. Grid power managed DC link balance:
-\begin{equation}
-P_{grid} = P_{rotor,dc} + P_{losses} - P_{pv}
-\label{eq:run1_power_balance}
-\end{equation}
-where $P_{pv} = 0$ for Run 1. DC link voltage maintained acceptable regulation with transient characteristics varying by controller type.
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run1_M3_RotorCurrent.png}
-        \caption{Rotor current response (three-phase)}
-        \label{fig:run1_rotor_current}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run1_M4_Powers.png}
-        \caption{Power measurements: $P_{rotor}$ (yellow), $P_{grid}$ (blue), $P_{dc}$ (magenta)}
-        \label{fig:run1_powers}
-    \end{subfigure}
-    \caption{Run 1 baseline performance without solar PV: (a) Three-phase rotor currents showing controlled operation during wind variations, (b) Power flow measurements demonstrating grid dependency with $P_{rotor} \approx 6$ kW, $P_{grid}$ oscillating around 0, and $P_{dc}$ transitioning from positive to negative indicating subsynchronous to supersynchronous mode change}
-    \label{fig:run1_results}
-\end{figure}
-
-\textbf{Key Observations:} Grid must supply all DC link power during subsynchronous operation. Controller performance differences (PI, DDPG, TD3) observable in transient response and voltage regulation accuracy.
-
-\subsection{Run 2: DFIG Performance With Solar PV Integration}
-\label{subsec:run2_integrated}
-
-Run 2 evaluated solar PV integration effects with $I_{solar} = 50$ A at the DC link, using the same wind profile as Run 1.
-
-\textbf{Modified Power Balance:}
-\begin{equation}
-C\frac{dV_{dc}}{dt} = i_{pv} + i_{r,dc} - i_{g,dc}
-\label{eq:run2_dc_balance}
-\end{equation}
-\begin{equation}
-P_{grid,new} = P_{grid,baseline} - P_{solar}
-\label{eq:run2_grid_reduction}
-\end{equation}
-
-With $I_{solar} = 50$ A: $P_{solar} = V_{dc} \times I_{solar} \approx 230$ V $\times$ 50 A = 11.5 kW.
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run2_M1_PSolar.png}
-        \caption{Solar power injection: $I_{solar}$ (blue), $P_{solar}$ (yellow), $V_{dc}$ (magenta)}
-        \label{fig:run2_solar}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run2_M2_Powers.png}
-        \caption{System powers with solar: $P_{rotor}$ (yellow), $P_{grid}$ (blue), $P_{dc}$ (magenta)}
-        \label{fig:run2_powers}
-    \end{subfigure}
-    \caption{Run 2 performance with solar PV integration: (a) Solar current step to $\approx 5$ A producing $P_{solar} \approx 6$ kW with stable DC link voltage around 5 V (scaled), (b) Power flow showing grid power reduction (blue transitioning from negative to near-zero) due to solar contribution, while rotor power (yellow) remains at $\approx 6$ kW, demonstrating independence of wind-side operation from solar integration}
-    \label{fig:run2_results}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.75\textwidth]{images/Run2_M3_RotorCurrent.png}
-    \caption{Run 2 three-phase rotor current response with solar PV integration. The rotor currents remain balanced and stable despite 5 A solar injection at the DC link, demonstrating that solar PV integration does not interfere with wind-side MPPT control. The current magnitude and frequency are determined solely by wind speed and rotor slip, validating the independent operation of the two subsystems}
-    \label{fig:run2_rotor_current}
-\end{figure}
-
-\textbf{Key Observations:} Solar PV did not affect $P_{rotor}$ (remains wind-determined). Enhanced DC link voltage stability. Grid power offset: $P_{grid,Run2} \approx P_{grid,Run1} - P_{solar}$, transforming from grid import to potential export. TD3 demonstrated superior management of coupled solar-grid dynamics.
-
-\subsection{Run 3: Comparative Analysis - Baseline vs. Solar-Integrated}
-\label{subsec:run3_comparative}
-
-Run 3 systematically compared baseline (Run 1) and solar-integrated (Run 2) performance, quantifying solar PV integration benefits.
-
-\textbf{Rotor Power:} $P_{rotor,Run2} \approx P_{rotor,Run1}$, validating independent wind energy extraction.
-
-\textbf{Grid Power:}
-\begin{table}[htbp]
-\centering
-\caption{Grid Power Comparison: Run 1 vs Run 2}
-\label{tab:run3_grid_comparison}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Parameter} & \textbf{Run 1 (No Solar)} & \textbf{Run 2 (With Solar)} & \textbf{Change} \\
-\hline
-Wind Speed & 10 $\rightarrow$ 11.5 m/s & 10 $\rightarrow$ 11.5 m/s & - \\
-$I_{solar}$ & 0 A & 50 A & +50 A \\
-$P_{solar}$ & 0 kW & 11.5 kW & +11.5 kW \\
-$P_{grid}$ (typical) & -8 to -5 kW & +3 to +6 kW & $\approx$ +11 kW \\
-\hline
-\end{tabular}
-\end{table}
-
-Negative-to-positive $P_{grid}$ transition indicates transformation from grid import to export mode.
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run1_M4_Powers.png}
-        \caption{Run 1: Without solar PV - $P_{grid}$ oscillates around 0}
-        \label{fig:run3_without_solar}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run2_M2_Powers.png}
-        \caption{Run 2: With solar PV - $P_{grid}$ reduced significantly}
-        \label{fig:run3_with_solar}
-    \end{subfigure}
-    \caption{Run 3 comparative analysis: Direct comparison of (a) baseline operation showing grid power oscillating around zero with occasional negative excursions (grid import), and (b) solar-integrated operation where grid power remains consistently lower or near-zero due to solar contribution offsetting grid requirements. Yellow trace shows rotor power remains unchanged at $\approx 6$ kW in both cases, validating independent control}
-    \label{fig:run3_comparison}
-\end{figure}
-
-\textbf{Voltage Regulation:}
-\begin{table}[htbp]
-\centering
-\caption{DC Link Voltage Regulation Comparison}
-\label{tab:run3_voltage_comparison}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Controller} & \textbf{Run 1: $\Delta V_{dc}$ (\%)} & \textbf{Run 2: $\Delta V_{dc}$ (\%)} & \textbf{Improvement} \\
-\hline
-PI Controller & $\pm 5.0$ & $\pm 4.2$ & 16\% \\
-DDPG Controller & $\pm 4.8$ & $\pm 4.0$ & 17\% \\
-TD3 Controller & $\pm 4.6$ & $\pm 3.8$ & 17\% \\
-\hline
-\end{tabular}
-\end{table}
-
-\textbf{Key Insights:} Solar assists voltage stability, rotor-side operation remains independent, grid dependency reduced (import $\rightarrow$ export), and TD3 maintains performance advantage.
-
-\subsection{Run 4: Multi-Scenario Wind and Solar Variations}
-\label{subsec:run4_multiscenario}
-
-Run 4 tested controller adaptability across multiple operating scenarios:
-
-\begin{table}[htbp]
-\centering
-\caption{Run 4 Test Scenarios}
-\label{tab:run4_scenarios}
-\begin{tabular}{|l|c|c|l|}
-\hline
-\textbf{Scenario} & \textbf{Wind Speed (m/s)} & \textbf{$I_{solar}$ (A)} & \textbf{Operating Mode} \\
-\hline
-M1 (Baseline) & 11.2 (fixed) & 0 $\rightarrow$ 30 $\rightarrow$ 50 & Supersynchronous \\
-M2 (Low Wind) & 10.0 & 0 $\rightarrow$ 30 & Subsynchronous \\
-M3 (High Wind) & 11.5 (fixed) & Variable ramp & Supersynchronous \\
-\hline
-\end{tabular}
-\end{table}
-
-\textbf{Scenario M1 (Solar Ramp, Fixed Wind):} With wind fixed at 11.2 m/s, $I_{solar}$ ramped 0 $\rightarrow$ 50 A. $V_{dc}$ remained remarkably constant despite 11.5 kW solar power increase. Rotor current unchanged. Grid power decreased proportionally: $\Delta P_{grid} \approx -\Delta P_{solar}$.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.85\textwidth]{images/Run4_M1_Solar.png}
-    \caption{Run 4 Scenario M1: Solar current ramp response with fixed wind speed (11.2 m/s). The figure shows three key signals: DC link voltage $V_{dc}$ (yellow, remains stable at $\approx 6$ V scaled), solar current $I_{solar}$ (blue, ramping from 0 to 5 A at t = 0 s), and solar power $P_{solar}$ (magenta, increasing proportionally to current). Critically, despite the 5 A solar injection, the DC link voltage remains remarkably constant, and the rotor current (not shown) is unchanged, validating that solar PV integration does not disturb wind-side MPPT operation}
-    \label{fig:run4_m1}
-\end{figure}
-
-\textbf{Scenario M2 (Subsynchronous):} At 10.0 m/s wind ($N_r < N_s$), power flow: Grid $\rightarrow$ GSC $\rightarrow$ RSC $\rightarrow$ Rotor. Solar PV offset grid import, improved efficiency, enhanced voltage stability.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.85\textwidth]{images/Run4_M2_Powers.png}
-    \caption{Run 4 Scenario M2: Subsynchronous operation power flow analysis. The plot shows system behavior during subsynchronous mode (rotor speed below synchronous): $P_{rotor}$ (yellow) at $\approx 6$ kW indicating mechanical power extraction, $P_{grid}$ (blue) oscillating around 0 and becoming negative indicating grid power import requirement during subsynchronous operation, and $P_{dc}$ (magenta) transitioning from positive to strongly negative values confirming power flow direction from grid through converters to rotor. This validates the subsynchronous power flow: Grid $\rightarrow$ GSC $\rightarrow$ DC Link $\rightarrow$ RSC $\rightarrow$ Rotor}
-    \label{fig:run4_m2}
-\end{figure}
-
-\textbf{Scenario M3 (High Wind, Variable Solar):} At 11.5 m/s with continuous solar variations, rotor-side maintained MPPT, voltage stability preserved despite high throughput, TD3 $>$ DDPG $>$ PI ranking maintained.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.75\textwidth]{images/Run4_M3_Rotor_Current.png}
-    \caption{Run 4 Scenario M3: Three-phase rotor current response under high wind (11.5 m/s) with variable solar irradiance. The rotor currents maintain balanced sinusoidal waveforms despite continuous solar variations, demonstrating excellent disturbance rejection. Current magnitude increases appropriately with wind power while remaining unaffected by solar fluctuations, confirming the decoupled control architecture. The stable frequency and amplitude validate TD3 controller's ability to maintain MPPT under coupled wind-solar dynamics}
-    \label{fig:run4_m3_rotor_current}
-\end{figure}
-
-\textbf{Summary:}
-\begin{table}[htbp]
-\centering
-\caption{Run 4 Key Findings Summary}
-\label{tab:run4_summary}
-\begin{tabular}{|l|p{10cm}|}
-\hline
-\textbf{Finding} & \textbf{Implication} \\
-\hline
-Solar does not affect rotor power & Validates independent wind/solar control architecture \\
-DC voltage stability maintained & Confirms GSC control effectiveness across scenarios \\
-Grid power offset by solar & Demonstrates economic benefit of hybrid system \\
-Performance consistent across modes & Validates controller robustness in both sub/supersynchronous \\
-TD3 superiority maintained & Confirms TD3 advantages across operational envelope \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Run 5: Combined Wind and Solar Disturbances}
-\label{subsec:run5_combined}
-
-\subsubsection{Test Objective}
-
-Run 5 presented the most challenging scenario: simultaneous variations in both wind speed and solar irradiance, testing controller performance under realistic coupled disturbances representing actual field conditions.
-
-\textbf{Test Configuration:}
-\begin{itemize}
-    \item Time 0--5 s: Wind 10 m/s, $I_{solar} = 0$ A (baseline)
-    \item Time 5--10 s: Wind ramp to 11.2 m/s, $I_{solar}$ ramp to 30 A
-    \item Time 10--15 s: Hold wind at 11.2 m/s, $I_{solar}$ step to 50 A
-\end{itemize}
-
-\subsubsection{Coupled Dynamics Analysis}
-
-The simultaneous disturbances create complex coupled dynamics:
-
-\begin{equation}
-\frac{dV_{dc}}{dt} = f(v_w(t), G(t), \text{controller actions})
-\label{eq:run5_coupled}
-\end{equation}
-
-where both wind speed $v_w(t)$ and solar irradiance $G(t)$ (represented by $I_{solar}(t)$) vary simultaneously.
-
-\textbf{Power Balance Under Coupled Disturbances:}
-
-\begin{equation}
-P_{grid}(t) = P_{rotor}(v_w(t)) - P_{solar}(G(t)) + P_{losses}
-\label{eq:run5_power_balance}
-\end{equation}
-
-Both $P_{rotor}$ and $P_{solar}$ vary simultaneously, requiring coordinated GSC and RSC control to maintain system stability.
-
-\subsubsection{Controller Performance Comparison}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run5_M1_Solar.png}
-        \caption{Solar variables during combined disturbances}
-        \label{fig:run5_solar}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run5_M2_Powers.png}
-        \caption{System powers under coupled wind-solar variations}
-        \label{fig:run5_powers}
-    \end{subfigure}
-    \\[1ex]
-    \begin{subfigure}[b]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/Run5_M3_RotorCurrent.png}
-        \caption{Rotor current response to simultaneous disturbances}
-        \label{fig:run5_rotor}
-    \end{subfigure}
-    \caption{Run 5 combined wind and solar disturbances: (a) Solar current ramping from 0 to 5 A with DC voltage (yellow) remaining stable, (b) System powers showing $P_{rotor}$ (yellow) varying with wind, $P_{grid}$ (blue) responding to both wind and solar changes, and $P_{dc}$ (magenta) managing power balance, (c) Three-phase rotor currents demonstrating controlled operation throughout the coupled disturbances. The simultaneous variations in wind speed (10 $\rightarrow$ 11.2 m/s) and solar current (0 $\rightarrow$ 5 A) represent the most challenging test scenario, validating controller robustness under realistic field conditions}
-    \label{fig:run5_comparison}
-\end{figure}
-
-\textbf{TD3 Controller Performance:}
-
-Under coupled disturbances, TD3 demonstrated exceptional performance:
-\begin{itemize}
-    \item DC voltage overshoot: < 5\%
-    \item Settling time: < 100 ms
-    \item No oscillations or instability
-    \item Smooth power transitions
-\end{itemize}
-
-The twin-critic architecture and target policy smoothing (Equations~\ref{eq:clipped_double_q} and~\ref{eq:target_smoothing}) enabled TD3 to handle the complex multi-input disturbance scenario effectively.
-
-\textbf{DDPG Controller Performance:}
-
-DDPG showed good performance but with measurable degradation:
-\begin{itemize}
-    \item DC voltage overshoot: 5--7\%
-    \item Settling time: 110--120 ms
-    \item Minor oscillations during transients
-    \item Occasional aggressive control actions
-\end{itemize}
-
-The single-critic overestimation occasionally produced suboptimal actions during the most challenging transients.
-
-\textbf{PI Controller Performance:}
-
-PI control exhibited significant limitations:
-\begin{itemize}
-    \item DC voltage overshoot: 8--10\%
-    \item Settling time: 140--160 ms
-    \item Pronounced oscillations
-    \item Sluggish adaptation to disturbances
-\end{itemize}
-
-Fixed gains could not adequately respond to the coupled, nonlinear dynamics of simultaneous wind and solar variations.
-
-\subsubsection{Quantitative Performance Metrics}
-
-\begin{table}[htbp]
-\centering
-\caption{Run 5 Performance Metrics - Combined Disturbances}
-\label{tab:run5_metrics}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Metric} & \textbf{PI} & \textbf{DDPG} & \textbf{TD3} \\
-\hline
-DC Voltage Overshoot (\%) & 8--10 & 5--7 & < 5 \\
-Settling Time (ms) & 140--160 & 110--120 & < 100 \\
-Steady-State Error (\%) & 1.5--2.0 & 0.8--1.2 & < 0.5 \\
-Power Tracking RMSE (W) & 450--550 & 280--350 & 180--240 \\
-\hline
-\end{tabular}
-\end{table}
-
-The quantitative metrics confirm TD3's substantial performance advantages under the most demanding test conditions.
-
-\subsubsection{Run 5 Key Observations}
-
-\begin{enumerate}
-    \item \textbf{Solar PV maintains DC link stability:} Even under simultaneous wind variations, solar contribution helped maintain DC voltage within acceptable bounds
-    
-    \item \textbf{Coupled disturbances reveal controller limitations:} Combined disturbances exposed the weaknesses of PI control and occasional DDPG overestimation
-    
-    \item \textbf{TD3 robustness validated:} The superior performance of TD3 under coupled disturbances validates the theoretical advantages of twin-critic architecture and delayed policy updates
-    
-    \item \textbf{Real-world applicability:} Run 5 conditions most closely simulate actual field operation with variable wind and solar, demonstrating practical deployment viability
-\end{enumerate}
 
 \subsection{Cross-Run Performance Summary}
 \label{subsec:cross_run_summary}
@@ -1125,55 +875,4 @@ TD3 maintained superior performance across the entire operating range, demonstra
 
 \paragraph{DDPG Controller:}
 DDPG exhibited good adaptability across most operating conditions, performing well within the central operating range. However, occasional overshoots occurred at operating range extremes where the single-critic value function approximation became less accurate. Performance degradation of 5 to 10 percent was observed at boundary conditions far from the training distribution. The single-critic overestimation bias became more pronounced under extreme conditions, leading to overly aggressive control actions that induced transient overshoots.
-
-\paragraph{PI Controller:}
-The PI controller's performance degraded significantly when operating far from its design point, highlighting the fundamental limitation of fixed-gain linear control for nonlinear time-varying systems. Voltage regulation deteriorated to $\pm 8$ percent at the extremes of the operating range, approaching or exceeding grid code limits. The controller would require retuning for different operating regimes to maintain acceptable performance, which is impractical for systems experiencing continuously varying conditions. Fixed gains proved unable to adapt to the varying system dynamics encountered across the wide range of wind speeds, solar irradiances, and grid conditions.
-
-\textbf{Statistical Analysis:}
-
-Performance metrics calculated across 100 test runs with randomly sampled operating conditions reveal quantitative robustness differences. Mean performance followed the expected ordering with TD3 exceeding DDPG which in turn exceeded PI, consistent with performance observed under nominal conditions. Standard deviation analysis showed TD3 exhibited 30 percent lower variance in performance metrics than DDPG and 50 percent lower variance than PI, indicating more consistent and predictable behavior across diverse conditions. Worst-case performance analysis demonstrated that TD3 maintained acceptable performance in 98 percent of test scenarios versus 92 percent for DDPG and only 78 percent for PI, confirming superior reliability for deployment in real systems facing unpredictable operating conditions.
-
-\textbf{Implications for Algorithm Design:}
-
-The superior robustness of TD3 can be directly attributed to the three algorithmic innovations described in Section~\ref{subsec:td3_innovations}. First, conservative value estimates produced by clipped double Q-learning (Equation~\ref{eq:clipped_double_q}) generate robust policies that avoid aggressive actions, providing larger safety margins that accommodate modeling uncertainties and parameter variations without performance collapse. Second, target policy smoothing (Equation~\ref{eq:target_smoothing}) prevents overfitting to narrow peaks in the value function, improving generalization to states not encountered during training and making the policy more robust to distribution shift. Third, delayed policy updates (Equation~\ref{eq:delayed_updates}) ensure policies are learned from stable value estimates rather than noisy approximations, resulting in consistent behavior that maintains performance across varying operating conditions.
-
-\subsection{Computational Performance}
-\label{subsec:computational_performance}
-
-Table~\ref{tab:computational} compares the computational requirements for all three controllers, an essential consideration for practical deployment on embedded control hardware.
-
-\begin{table}[htbp]
-\centering
-\caption{Computational performance comparison}
-\label{tab:computational}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Metric} & \textbf{PI} & \textbf{DDPG} & \textbf{TD3} \\
-\midrule
-Training Time & N/A & 8 hours & 12 hours \\
-Training Episodes & N/A & 2000 & 2500 \\
-Inference Time per Step & 0.01 ms & 0.15 ms & 0.18 ms \\
-Memory Footprint & Negligible & 5 MB & 8 MB \\
-CPU Usage (Inference) & < 1\% & 8\% & 10\% \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Training Phase Analysis:}
-
-TD3 training requires 50 percent longer time than DDPG, consuming 12 hours versus 8 hours for DDPG training. This additional training time stems from several algorithmic factors: the twin critic networks (Section~\ref{subsec:td3_critics}) double the critic computation per training step, delayed policy updates occurring every $d=2$ critic updates extend the total number of gradient computations needed for convergence, and the overall computational overhead is analyzed in detail in Section~\ref{subsec:computational_complexity}.
-
-However, training represents a one-time offline cost that does not affect deployed system performance. The training is conducted on powerful GPU hardware such as Google Colab's NVIDIA T4 platform, leveraging parallel computation capabilities unavailable in embedded controllers. Once trained, the neural network parameters are frozen and deployed without retraining, making the training time irrelevant to real-time operation. The substantial performance gains achieved by TD3 over both DDPG and PI control fully justify the increased training time investment, particularly for long-term deployments spanning decades of operation.
-
-\textbf{Inference Phase Analysis:}
-
-Real-time feasibility is confirmed for both deep reinforcement learning controllers, with DDPG inference requiring 0.15 milliseconds and TD3 requiring 0.18 milliseconds, both well within the 1 millisecond control loop period typical for power electronic converters. While these inference times are approximately 15 times slower than PI control's 0.01 millisecond computation, they remain entirely acceptable and compatible with standard industrial control hardware using modern ARM processors or digital signal processors.
-
-Comparing TD3 versus DDPG inference performance reveals TD3 is only 20 percent slower than DDPG for real-time control, a negligible difference given the superior control performance achieved. Both controllers use only the single actor network for generating control actions during deployment, as the critic networks are not needed during inference and can be excluded from the deployed system. This means the performance difference between TD3 and DDPG training overhead does not translate to deployment penalty, making TD3's inference overhead negligible compared to its substantial control benefits.
-
-Memory requirements are modest and easily accommodated by modern embedded controllers. TD3 requires approximately 8 megabytes of memory to store the actor network and optionally the twin critic networks if online adaptation is desired. This footprint is easily accommodated by contemporary embedded controllers which typically feature 64 megabytes or more of RAM. Proper memory management ensures no impact on real-time performance, with network parameters stored in contiguous memory regions enabling efficient cache usage during inference.
-
-\textbf{Hardware Requirements for Deployment:}
-
-Based on the computational analysis and deployment considerations in Section~\ref{subsec:deployment_considerations}, three hardware tiers are recommended. The minimum viable platform consists of an ARM Cortex-A9 or equivalent processor running at 800 megahertz with 32 megabytes of RAM, suitable for small-scale turbines below 1 megawatt where cost is paramount. The recommended platform employs an ARM Cortex-A53 or equivalent processor at 1.2 gigahertz with 64 megabytes of RAM, appropriate for medium turbines in the 1 to 5 megawatt range where the modest cost increase is justified by improved control performance and computational headroom. The optimal platform utilizes an industrial PC with dedicated GPU providing maximum performance headroom for large turbines exceeding 5 megawatts or for systems requiring online adaptation and continuous learning capabilities.
 
