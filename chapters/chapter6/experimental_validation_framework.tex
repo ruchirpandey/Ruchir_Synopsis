@@ -555,7 +555,7 @@ Under coupled disturbances, TD3 demonstrated exceptional performance:
     \item Smooth power transitions
 \end{itemize}
 
-The twin-critic architecture and target policy smoothing (Equations~\ref{eq:clipped_double_q} and~\ref{eq:target_smoothing}) enabled TD3 to handle the complex multi-input disturbance scenario effectively.
+The twin-critic architecture and target policy smoothing enabled TD3 to handle the complex multi-input disturbance scenario effectively.
 
 \textbf{DDPG Controller Performance:}
 
@@ -622,7 +622,7 @@ The quantitative metrics confirm TD3's substantial performance advantages under 
 \section{Dynamic Response Analysis}
 \label{sec:dynamic_response}
 
-This section analyzes the dynamic response characteristics of all three controllers under the test scenarios defined in Section~\ref{sec:test_scenarios}, validating the DRL advantages (Chapter~\ref{chap:rl}) and TD3 innovations (Section~\ref{subsec:td3_innovations}).
+This section analyzes the dynamic response characteristics of all three controllers under the test scenarios defined in Section~\ref{sec:test_scenarios}, validating the DRL advantages (Chapter~\ref{chap:literature}) and TD3 innovations (Section~\ref{subsec:td3_motivation}).
 
 \subsection{Solar PV Current Step Response}
 \label{subsec:pv_step_response}
@@ -638,7 +638,7 @@ Figure~\ref{fig:pv_step} illustrates system response to a solar PV current step 
 
 \textbf{Comparative Performance:} TD3 maintained voltage regulation within $\pm 4.6$\% with settling time < 90 ms, minimal overshoot, smooth trajectory without oscillations, and steady-state error < 0.5\%. DDPG achieved $\pm 4.8$\% regulation with slightly longer settling and minor oscillations, occasionally exhibiting aggressive actions from single-critic overestimation (Section~\ref{subsec:td3_motivation}). PI control showed $\pm 5$\% regulation with settling > 120 ms and largest overshoot, reflecting fixed-gain limitations for nonlinear coupled PV-DC link-GSC dynamics.
 
-TD3's superior performance stems from conservative value estimation via clipped double Q-learning (Equation~\ref{eq:clipped_double_q}) preventing aggressive overshoots, and target policy smoothing (Equation~\ref{eq:target_smoothing}) ensuring smoother control trajectories.
+TD3's superior performance stems from conservative value estimation via clipped double Q-learning preventing aggressive overshoots, and target policy smoothing ensuring smoother control trajectories.
 
 \subsection{Wind Speed Step Response}
 \label{subsec:wind_step_response}
@@ -788,7 +788,7 @@ TD3 Controller & $\pm 4.6\%$ & 0.97--0.99 \\
 
 \textbf{Key Findings:} TD3 achieves tightest voltage regulation ($\pm 4.6$\%), 8\% better than PI ($\pm 5$\%) and 4.2\% better than DDPG ($\pm 4.8$\%). Both DRL controllers achieve 0.97--0.99 power factor versus 0.95--0.98 for PI, enabling better grid support. TD3 demonstrates fastest disturbance recovery and robust performance across 200--1000 W/m\textsuperscript{2} solar irradiance.
 
-Superior GSC performance relates to system architecture (Chapter~\ref{chap:modeling}): PV-DC link integration creates coupled dynamics (Equation~\ref{eq:vdc_dot}) requiring coordinated management of all power flows. The unified control approach manages interactions holistically, with learning-based optimization (Section~\ref{subsec:training_infrastructure}) enabling TD3 to discover optimal coordination without explicit mathematical models.
+Superior GSC performance relates to system architecture (Chapter~\ref{chap:model}): PV-DC link integration creates coupled dynamics (Equation~\ref{eq:vdc_dot}) requiring coordinated management of all power flows. The unified control approach manages interactions holistically, with learning-based optimization (Section~\ref{subsec:training_infrastructure}) enabling TD3 to discover optimal coordination without explicit mathematical models.
 
 \subsection{Cross-Run Performance Summary}
 \label{subsec:cross_run_summary}

@@ -94,7 +94,7 @@ These coupled nonlinear dynamics motivate deep RL for learning optimal control f
 \subsection{Reward Function Structure}
 \label{subsec:reward_function}
 
-Multi-objective quadratic penalty balancing power tracking, voltage regulation, and stability.
+This is a Multi-objective quadratic reward function that balances power tracking, voltage regulation, and stability.
 
 \subsubsection{RSC Reward}
 
@@ -142,13 +142,13 @@ DDPG and TD3 use deep neural networks for actor/critic approximation.
 
 Maps states to actions: $\mu(s|\theta_\mu) = \tanh(W_n\sigma(W_{n-1} \cdots \sigma(W_1 s + b_1) \cdots + b_{n-1}) + b_n)$ where $\sigma(x) = \max(0, x)$ (ReLU).
 
-\textbf{Architecture:} It consists of input layer of [11] neurons with [400x300] hidden layers and output layers with [4] neurons with ReLU activation and tanh output.
+Architecture: It consists of input layer of [11] neurons with [400x300] hidden layers and output layers with [4] neurons with ReLU activation and tanh output.
 
 \subsubsection{Critic Network}
 
 Evaluates state-action pairs: $Q(s,a|\theta_Q) = W'_n\sigma(W'_{n-1} \cdots \sigma(W'_1[s,a] + b'_1) \cdots + b'_{n-1}) + b'_n$ where $[s,a]$ concatenates state/action.
 
-\textbf{Architecture:} It consists of input layer of [15] neurons with [400x300] hidden layers and output layers with [1] neurons with ReLU activation and linear output. DDPG uses 1 critic, TD3 uses 2 (Section~\ref{subsec:td3_critics}).
+Architecture: It consists of input layer of [15] neurons with [400x300] hidden layers and output layers with [1] neurons with ReLU activation and linear output. DDPG uses 1 critic, TD3 uses 2 (Section~\ref{subsec:td3_critics}).
 
 \subsubsection{Weight Initialization}
 
@@ -200,13 +200,14 @@ where $\tau \ll 1$ prevents rapid target changes.
 
 \subsubsection{Curriculum Learning}
 
-Gradual task difficulty increase: \textbf{Phase 1 (Eps 1--100):} Random exploration, buffer population. \textbf{Phase 2 (101--500):} DC link voltage only ($r = -(v_{dc} - v_{dc}^*)^2$). \textbf{Phase 3 (501--1000):} DC link + RSC power ($r = r_{RSC} + r_{GSC,voltage}$). \textbf{Phase 4 (1001+):} Full multi-objective (Eq.~\ref{eq:total_reward}). Essential for convergence.
+Gradual task difficulty increase in following phases: 
+\begin{itemize}
 
-\subsubsection{Reproducibility}
-
-All experiments are conducted over 5 independent training runs with different random seeds (seeds 0--4) for network initialization, replay buffer sampling, and exploration noise generation. Results are reported as mean $\pm$ standard deviation across these runs. The simulation environment is deterministic given the same seed, ensuring reproducibility. Model checkpoints are saved every 100 episodes, and the best-performing checkpoint with highest validation reward is selected for HIL deployment.
-
-
+\item \textbf{Phase 1 (Episode 1--100):} Random exploration, buffer population. 
+\item \textbf{Phase 2 (Episode 101--500):} DC link voltage only ($r = -(v_{dc} - v_{dc}^*)^2$). 
+\item \textbf{Phase 3 (Episode 501--1000):} DC link + RSC power ($r = r_{RSC} + r_{GSC,voltage}$). 
+\item \textbf{Phase 4 (Episode 1001+):} Full multi-objective (Eq.~\ref{eq:total_reward}) is essential for convergence.
+\end{itemize}
 
 
 % ------------------------------------------------------------
@@ -216,17 +217,17 @@ All experiments are conducted over 5 independent training runs with different ra
 \subsection{Deep Deterministic Policy Gradient (DDPG) Implementation}
 \label{sec:ddpg_implementation}
 
-DDPG algorithm for hybrid DFIG-PV system \cite{Pandey2025DDPG}: actor-critic for continuous control with deterministic policy gradients.
+The actor-critic network for continuous control with deterministic policy gradients has been discussed in DDPG algorithm for hybrid DFIG-PV system \cite{Pandey2025DDPG}.
 
 \subsubsection{DDPG Overview}
 \label{subsec:ddpg_overview}
 
-Extends DQN to continuous actions. \textbf{Core Principles:} Deterministic policy (simplifies gradient), off-policy learning (replay buffer, sample efficiency), actor-critic (actor proposes, critic evaluates), continuous action space (direct voltage commands, fine-grained control).
+It extends DQN to deterministic policy with simplified gradient, off-policy learning with replay buffer and sample efficiency, actor-critic where actor proposes and critic evaluates continuous action space with direct voltage commands and fine-grained control.
 
 \subsubsection{Single Critic Architecture}
 \label{subsec:ddpg_critic}
 
-Single critic $Q_\phi(s,a)$ estimates action-value: $Q^\pi(s,a) = E\left[ \sum_{t=0}^{\infty} \gamma^t r_t \mid s_0=s, a_0=a, \pi \right]$. Structure per Section~\ref{subsec:nn_foundation}.
+Single critic $Q_\phi(s,a)$ estimates action-value: $Q^\pi(s,a) = E\left[ \sum_{t=0}^{\infty} \gamma^t r_t \mid s_0=s, a_0=a, \pi \right]$ as discussed in Section~\ref{subsec:nn_foundation}.
 
 \subsubsection{Policy Gradient}
 \label{subsec:ddpg_policy_gradient}
@@ -309,28 +310,30 @@ The complete DDPG training procedure follows these steps:
 
 \subsubsection{DDPG Hyperparameters}
 \label{subsec:ddpg_hyperparameters}
+\begin{itemize}
 
-\textbf{Learning:} Discount factor $\gamma = 0.99$, actor learning rate $1 \times 10^{-4}$, critic learning rate $1 \times 10^{-3}$, target update rate $\tau = 0.001$.
+\item[]  \textbf{Learning:} Discount factor $\gamma = 0.99$, actor learning rate $1 \times 10^{-4}$, critic learning rate $1 \times 10^{-3}$, target update rate $\tau = 0.001$.
 
-\textbf{Training:} Batch size 64, replay buffer $1 \times 10^6$, Ornstein-Uhlenbeck noise ($\theta = 0.15$, $\sigma = 0.2$).
-
+\item[]  \textbf{Training:} Batch size 64, replay buffer $1 \times 10^6$, Ornstein-Uhlenbeck noise ($\theta = 0.15$, $\sigma = 0.2$).
+\end{itemize}
 \subsubsection{DDPG Reward Weights}
 \label{subsec:ddpg_rewards}
+\begin{itemize} 
+\item[] \textbf{RSC weights:} $w_1 = 0.4$, $w_2 = 0.3$, $w_3 = 0.3$.
 
-\textbf{RSC weights:} $w_1 = 0.4$, $w_2 = 0.3$, $w_3 = 0.3$.
-
-\textbf{GSC weights:} $w_4 = 0.3$, $w_5 = 0.2$, $w_6 = 0.2$.
-
+\item[] \textbf{GSC weights:} $w_4 = 0.3$, $w_5 = 0.2$, $w_6 = 0.2$.
+\end{itemize}
 \subsubsection{DDPG Training Configuration}
 \label{subsec:ddpg_training_config}
+\begin{itemize} 
+\item[] \textbf{Episodes:} 2000 episodes × 1000 steps each.
 
-\textbf{Episodes:} 2000 episodes × 1000 steps each.
+\item[] \textbf{Curriculum:} Warmup (episodes 1--100), simplified task (101--500), intermediate (501--1000), full multi-objective (1001--2000).
 
-\textbf{Curriculum:} Warmup (episodes 1--100), simplified task (101--500), intermediate (501--1000), full multi-objective (1001--2000).
+\item[] \textbf{Exploration:} Minimum noise 0.1, decay factor 0.995 per episode.
 
-\textbf{Exploration:} Minimum noise 0.1, decay factor 0.995 per episode.
-
-\textbf{Convergence:} Same criterion as Eq.~\ref{eq:convergence_criterion} with 100 consecutive episodes (less stringent than TD3). Total training time $\approx$8 hours.
+\item[] \textbf{Convergence:} Same criterion as Eq.~\ref{eq:convergence_criterion} with 100 consecutive episodes (less stringent than TD3). Total training time $\approx$8 hours.
+\end{itemize}
 \subsubsection{DDPG Training Results}
 \label{subsec:ddpg_training_results}
 The DDPG agent was trained for 2000 episodes (approximately $4 \times 10^{6}$ environment interaction steps) with actor learning rate $\alpha_{actor} = 1 \times 10^{-4}$, critic learning rate $\alpha_{critic} = 1 \times 10^{-3}$, discount factor $\gamma = 0.99$, and Ornstein-Uhlenbeck exploration noise. Figures~\ref{fig:ddpg_critic_loss} and~\ref{fig:ddpg_rewards} illustrate the critic loss and episode reward progression throughout training.
@@ -418,7 +421,7 @@ y_i = r_i + \gamma \min_{j=1,2} Q'_{\phi_j}\left(s_{i+1}, \text{clip}\left(\mu'(
     \item Ensure physical bounds: $\tilde{a}' = \text{clip}(\tilde{a}', a_{low}, a_{high})$
     \item Evaluate with both target critics: $Q'_{\phi_1}(s_{i+1}, \tilde{a}')$ and $Q'_{\phi_2}(s_{i+1}, \tilde{a}')$
     \item Take minimum: $\min(Q'_{\phi_1}, Q'_{\phi_2})$
-    \item Add immediate reward: $y_i = r_i + \gamma \min(...)$
+    \item Add immediate reward: $y_i = r_i + \gamma \min(Q'_{\phi_1}, Q'_{\phi_2})$
 \end{enumerate}
 
 \subsubsection{TD3 Policy Gradient with Delayed Updates}
@@ -431,7 +434,7 @@ The actor is updated using the policy gradient, but only every $d$ critic update
 \label{eq:td3_policy_gradient}
 \end{equation}
 
-\textit{Note: Only the first critic $Q_{\phi_1}$ is used for the policy gradient, as using both would double the gradient computation cost without significant benefit.}
+Only the first critic $Q_{\phi_1}$ is used for the policy gradient, as using both would double the gradient computation cost without significant benefit.
 
 \subsubsection{TD3 Training Procedure}
 
@@ -469,35 +472,38 @@ The complete TD3 training procedure follows these steps:
 
 \subsubsection{TD3 Hyperparameters}
 \label{subsec:td3_hyperparameters}
+\begin{itemize}
+    
+\item[] \textbf{Learning:} Discount factor $\gamma = 0.99$, actor learning rate $8 \times 10^{-5}$, critic learning rate $7.5 \times 10^{-4}$, target update rate $\tau = 0.0008$.
 
-\textbf{Learning:} Discount factor $\gamma = 0.99$, actor learning rate $8 \times 10^{-5}$, critic learning rate $7.5 \times 10^{-4}$, target update rate $\tau = 0.0008$.
+\item[] \textbf{Training:} Batch size 64, replay buffer $1 \times 10^6$.
 
-\textbf{Training:} Batch size 64, replay buffer $1 \times 10^6$.
-
-\textbf{TD3-Specific:} Policy delay $d = 2$, target policy noise $\tilde{\sigma} = 0.2$, noise clip $c = 0.5$, exploration noise $\sigma_{explore} = 0.1$.
-
+\item[] \textbf{TD3-Specific:} Policy delay $d = 2$, target policy noise $\tilde{\sigma} = 0.2$, noise clip $c = 0.5$, exploration noise $\sigma_{explore} = 0.1$.
+\end{itemize}
 \subsubsection{TD3 Reward Weights}
 \label{subsec:td3_rewards}
+\begin{itemize}
+\item[] \textbf{RSC weights:} $w_1 = 0.4$, $w_2 = 0.3$, $w_3 = 0.3$.
 
-\textbf{RSC weights:} $w_1 = 0.4$, $w_2 = 0.3$, $w_3 = 0.3$.
-
-\textbf{GSC weights:} $w_4 = 0.2$, $w_5 = 0.4$, $w_6 = 0.4$.
-
+\item[] \textbf{GSC weights:} $w_4 = 0.2$, $w_5 = 0.4$, $w_6 = 0.4$.
+\end{itemize}
 \subsubsection{TD3 Training Configuration}
 \label{subsec:td3_training_config}
+\begin{itemize}
 
-\textbf{Episodes:} 2500 episodes × 1600 steps each.
+\item[] \textbf{Episodes:} 2500 episodes × 1600 steps each.
 
-\textbf{Curriculum:} Warmup (episodes 1--100), simplified task (101--300), intermediate (301--800), full multi-objective (801--2500).
+\item[] \textbf{Curriculum:} Warmup (episodes 1--100), simplified task (101--300), intermediate (301--800), full multi-objective (801--2500).
 
-\textbf{Exploration Decay:} TD3 uses Gaussian exploration noise with linear decay: $\sigma_{explore}(e) = \max(0.01, \sigma_0 - e \times \Delta\sigma)$, where $\sigma_0 = 0.1$ and $\Delta\sigma = 4 \times 10^{-5}$ per episode, reaching minimum noise at approximately episode 2250.
+\item[] \textbf{Exploration Decay:} TD3 uses Gaussian exploration noise with linear decay: $\sigma_{explore}(e) = \max(0.01, \sigma_0 - e \times \Delta\sigma)$, where $\sigma_0 = 0.1$ and $\Delta\sigma = 4 \times 10^{-5}$ per episode, reaching minimum noise at approximately episode 2250.
 
-\textbf{Convergence Criterion:} Training is considered converged when the 100-episode moving average of the total reward $\bar{R}_{100}$ satisfies:
+\item[] \textbf{Convergence Criterion:} Training is considered converged when the 100-episode moving average of the total reward $\bar{R}_{100}$ satisfies:
 \begin{equation}
 \frac{|\bar{R}_{100}(e) - \bar{R}_{100}(e-100)|}{\max(|\bar{R}_{100}(e)|, 1)} < 0.005
 \label{eq:convergence_criterion}
 \end{equation}
 for 200 consecutive episodes, indicating less than 0.5\% relative change in expected return. Convergence achieved around episode 2000. Total training time $\approx$12 hours.
+\end{itemize}
 \subsubsection{TD3 Training Results}
 \label{subsec:td3_training_results}
 The TD3 agent was trained for 2500 episodes with actor learning rate $\alpha_{actor} = 8 \times 10^{-5}$, critic learning rate $\alpha_{critic} = 7.5 \times 10^{-4}$, discount factor $\gamma = 0.99$, policy update delay $d = 2$, and target policy smoothing parameters $\sigma = 0.2$, $c = 0.5$. Figures~\ref{fig:td3_critic1_loss}, \ref{fig:td3_critic2_loss}, and~\ref{fig:td3_rewards} present the twin critic losses and episode rewards.
@@ -536,7 +542,7 @@ TD3 episode rewards exhibit a qualitatively different convergence profile compar
 
 \begin{enumerate}
     \item \textbf{Early stabilisation:} The policy converges to desired reward level within approximately 50 episodes, compared to the 1000-episode convergence delay observed in DDPG.
-    \item \textbf{Low reward variance:} The stable reward trajectory demonstrates that target policy smoothing effectively regularises the policy(\ref{eq:target_smoothing}).
+    \item \textbf{Low reward variance:} The stable reward trajectory demonstrates that target policy smoothing effectively regularises the policy.
     \item \textbf{Delayed actor updates:} The policy delay ensures the actor network is only updated once the two critics have had two gradient steps to improve their value estimates.
 \end{enumerate}
 \subsubsection{TD3 Implementation Summary}
@@ -566,14 +572,6 @@ To quantify the individual contribution of each TD3 innovation to DFIG-PV contro
     \item \textbf{Full TD3 (TC + DU + TS):} All three innovations combined
 \end{enumerate}
 
-Each configuration is trained for 2500 episodes over 5 random seeds using identical hyperparameters (except for the ablated component). Evaluation metrics include: mean episode reward, DC link voltage regulation error ($\Delta v_{dc}$), active/reactive power tracking RMSE, overestimation bias ($\mathbb{E}[Q_\phi - Q^\pi]$ estimated via Monte Carlo rollouts), and convergence speed (episodes to reach 90\% of final performance). Results are presented in Chapter~\ref{chap:ddpg_implementation}.
-
-% ------------------------------------------------------------
-% SECTION 5.4: TRAINING RESULTS
-% ------------------------------------------------------------
-
-
-
 
 % ------------------------------------------------------------
 % SECTION 5.4: IMPLEMENTATION COMPARISON
@@ -582,7 +580,7 @@ Each configuration is trained for 2500 episodes over 5 random seeds using identi
 \subsection{Comparative Implementation Analysis}
 \label{sec:implementation_comparison}
 
-Systematic DDPG vs TD3 comparison: architectural differences, computational trade-offs, deployment considerations.
+The DDPG  and TD3 has been compared for architectural differences, computational trade-offs and deployment considerations.
 
 \subsubsection{Algorithmic Differences}
 \label{subsec:algo_differences}
