@@ -163,7 +163,7 @@ The experimental validation was done using multiple test scenarios to evaluate c
 \subsection{Scenario 1: Simultaneous Step Changes}
 \label{subsec:scenario_step}
 
-\textbf{Objective:} It evaluates transient response to abrupt changes in both renewable sources.
+\textbf{Objective:} It evaluates transient response to abrupt changes in both renewable sources as detailed in \ref{subsec:run5_combined}.
 
 \textbf{Test procedure:}
 \begin{enumerate}
@@ -197,7 +197,7 @@ t_{response} = \min\{t : |y(t) - y_{ss}| \leq 0.1 |y_{ss}| \}
 
 where $y(t)$ is the system output and $y_{ss}$ is the steady-state value.
 
-\textbf{Acceptance criterion:} $t_{response} < 100$ ms for all controlled variables. Recent DRL validation studies for solar PV-integrated systems \cite{Mangalapuri2025} demonstrate that properly designed DRL controllers can achieve DC-link settling times as low as 0.25 s compared to 0.95 s for conventional PI control, while simultaneously reducing THD from 3.13\% to 1.01\%—establishing aggressive but achievable performance benchmarks for this research.
+\textbf{Acceptance criterion:} $t_{response} < 100$ ms for all controlled variables. Recent DRL validation studies for solar PV-integrated systems \cite{Mangalapuri2025} demonstrate that properly designed DRL controllers can achieve DC-link settling times as low as 0.25 s compared to 0.95 s for conventional PI control.
 
 \subsubsection{Overshoot Percentage}
 
@@ -256,7 +256,7 @@ This section presents experimental validation results from the OPAL-RT OP4510 HI
 \subsection{Experimental Test Campaign Overview}
 \label{subsec:test_campaign_overview}
 
-Five experimental runs validated different aspects of system behavior:
+The follwoing five experimental runs validated different aspects of system behavior as in Table \ref{tab:test_campaign}:
 
 \begin{table}[htbp]
 \centering
