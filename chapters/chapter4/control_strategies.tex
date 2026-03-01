@@ -56,7 +56,7 @@ Typical: $v_{min} = -400$ V, $v_{max} = +400$ V. Continuous actions enable fine-
 \subsection{System Dynamics Representation}
 \label{subsec:system_dynamics}
 
-System state evolution governed by nonlinear differential equations (Chapter~\ref{chap:rl}):
+System state evolution governed by nonlinear differential equations (Chapter~\ref{chap:model}):
 
 \begin{equation}
 \dot{\mathbf{s}} = f(\mathbf{s}, \mathbf{a}) = [\dot{i}_{qs}, \dot{i}_{ds}, \dot{i}_{qr}, \dot{i}_{dr}, \dot{\omega}_r, \dot{v}_{dc}, \dot{i}_{pv}, \dot{P}_s, \dot{Q}_s, \dot{P}_g, \dot{Q}_g, \dot{\theta}_r]^T
@@ -177,12 +177,11 @@ where $g_{\max} = 1.0$ for critic networks and $g_{\max} = 0.5$ for the actor ne
 
 \subsubsection{Platform}
 
-\textbf{Software:} Python 3.8, TensorFlow 2.10.0/Keras, NumPy 1.23.0, OpenAI Gym 0.26.0, MATLAB R2021b (HIL).
+\begin{itemize}
+\item \textbf{Software:} Python 3.12, NumPy 1.23.0, MATLAB R2019b (HIL).
 
-\textbf{Hardware:} Google Colab Pro (NVIDIA Tesla T4, 16 GB VRAM) for training; OPAL-RT OP4510 for HIL validation.
--------------------TBD------------------------
-\textbf{Recent Advances:} MATLAB/Simulink optimization \cite{Mauludin2025,Savio2025}, digital twins \cite{AlShetwi2025}, techno-economic frameworks \cite{Ayua2024}, multi-objective simulation \cite{Jacob2025}.
------------------------------------
+\item \textbf{Hardware:} Google Colab Pro was used which avails NVIDIA Tesla T4, 16 GB VRAM for training ML models and for real time testing OPAL-RT OP4510 HIL was used.
+\end{itemize}
 \subsubsection{Experience Replay}
 
 Replay buffer $\mathcal{B} = \{(s_t, a_t, r_t, s_{t+1})\}_{t=1:T}$ stores transitions. Random mini-batches sampled to break temporal correlations.
@@ -203,18 +202,12 @@ where $\tau \ll 1$ prevents rapid target changes.
 
 Gradual task difficulty increase: \textbf{Phase 1 (Eps 1--100):} Random exploration, buffer population. \textbf{Phase 2 (101--500):} DC link voltage only ($r = -(v_{dc} - v_{dc}^*)^2$). \textbf{Phase 3 (501--1000):} DC link + RSC power ($r = r_{RSC} + r_{GSC,voltage}$). \textbf{Phase 4 (1001+):} Full multi-objective (Eq.~\ref{eq:total_reward}). Essential for convergence.
 
-\subsubsection{Reproducibility Protocol}
+\subsubsection{Reproducibility}
 
-All experiments are conducted over 5 independent training runs with different random seeds (seeds 0--4) for network initialization, replay buffer sampling, and exploration noise generation. Results are reported as mean $\pm$ standard deviation across these runs. The simulation environment is deterministic given the same seed, ensuring reproducibility. Model checkpoints are saved every 100 episodes, and the best-performing checkpoint (highest validation reward) is selected for HIL deployment.
+All experiments are conducted over 5 independent training runs with different random seeds (seeds 0--4) for network initialization, replay buffer sampling, and exploration noise generation. Results are reported as mean $\pm$ standard deviation across these runs. The simulation environment is deterministic given the same seed, ensuring reproducibility. Model checkpoints are saved every 100 episodes, and the best-performing checkpoint with highest validation reward is selected for HIL deployment.
 
-\subsubsection{Proposed Emergency Fallback Strategy}
 
-For practical deployment of DRL controllers in power systems, a safety fallback mechanism is recommended. In the proposed design, a supervisory monitor would check DRL controller outputs against physical constraints---including converter voltage limits ($|v| > v_{max}$), DC link voltage deviation beyond $\pm$10\% of nominal, or sustained reward degradation over consecutive steps. Upon violation, control would transfer to a conventional PI controller with pre-tuned gains. While this fallback is not implemented in the current simulation framework, it represents an important consideration for future real-world deployment of the proposed DRL-based controllers.
--------------------------tbd----------------
-\subsection{Summary of Common Elements}
 
-These elements---state/action spaces, dynamics, reward, networks, infrastructure, and normalization---form the unified foundation for DDPG and TD3.
--------------------------------------------
 
 % ------------------------------------------------------------
 % SECTION 5.2: DDPG IMPLEMENTATION
@@ -543,7 +536,7 @@ TD3 episode rewards exhibit a qualitatively different convergence profile compar
 
 \begin{enumerate}
     \item \textbf{Early stabilisation:} The policy converges to desired reward level within approximately 50 episodes, compared to the 1000-episode convergence delay observed in DDPG.
-    \item \textbf{Low reward variance:} The stable reward trajectory demonstrates that target policy smoothing effectively regularises the policy consistent with Equation~(\ref{eq:target_smoothing}).
+    \item \textbf{Low reward variance:} The stable reward trajectory demonstrates that target policy smoothing effectively regularises the policy(\ref{eq:target_smoothing}).
     \item \textbf{Delayed actor updates:} The policy delay ensures the actor network is only updated once the two critics have had two gradient steps to improve their value estimates.
 \end{enumerate}
 \subsubsection{TD3 Implementation Summary}
@@ -560,7 +553,7 @@ The TD3 implementation offers significant advantages including reduced overestim
 However, TD3 requires 50\% more training (12h vs 8h), double critic parameters (253K vs 127K), slightly complex implementation, additional hyperparameters ($d$, $\tilde{\sigma}$, $c$). Performance improvements justify adoption for safety-critical applications.
 
 
-\subsection{TD3 Ablation Study Methodology}
+\subsection{TD3 based Learning Study Methodology}
 \label{subsec:ablation_methodology}
 
 To quantify the individual contribution of each TD3 innovation to DFIG-PV control performance, an ablation study is conducted with the following configurations:
@@ -573,7 +566,7 @@ To quantify the individual contribution of each TD3 innovation to DFIG-PV contro
     \item \textbf{Full TD3 (TC + DU + TS):} All three innovations combined
 \end{enumerate}
 
-Each configuration is trained for 2500 episodes over 5 random seeds using identical hyperparameters (except for the ablated component). Evaluation metrics include: mean episode reward, DC link voltage regulation error ($\Delta v_{dc}$), active/reactive power tracking RMSE, overestimation bias ($\mathbb{E}[Q_\phi - Q^\pi]$ estimated via Monte Carlo rollouts), and convergence speed (episodes to reach 90\% of final performance). Results are presented in Chapter~\ref{chap:td3}.
+Each configuration is trained for 2500 episodes over 5 random seeds using identical hyperparameters (except for the ablated component). Evaluation metrics include: mean episode reward, DC link voltage regulation error ($\Delta v_{dc}$), active/reactive power tracking RMSE, overestimation bias ($\mathbb{E}[Q_\phi - Q^\pi]$ estimated via Monte Carlo rollouts), and convergence speed (episodes to reach 90\% of final performance). Results are presented in Chapter~\ref{chap:ddpg_implementation}.
 
 % ------------------------------------------------------------
 % SECTION 5.4: TRAINING RESULTS
@@ -650,40 +643,12 @@ a = \mu(s|\theta_\mu) \rightarrow O(125,504) \text{ operations}
 \end{equation}
 
 \textbf{Critical insight:} Both algorithms have \textbf{identical inference complexity}. The twin critics are only used during training, not during real-time deployment. This means TD3's computational overhead during training does not impact real-time control performance.
-\\
-----------------tbd--------
-\\
-\subsubsection{Memory Requirements}
-\label{subsec:memory_requirements}
-\\
-----------------tbd--------
-\\
-\begin{table}[htbp]
-\centering
-\caption{Memory requirements comparison}
-\label{tab:memory_comparison}
-\begin{tabular}{|l|c|c|}
-\hline
-\textbf{Component} & \textbf{DDPG} & \textbf{TD3} \\
-\hline
-Actor network (online) & 502 KB & 502 KB \\
-Actor network (target) & 502 KB & 502 KB \\
-Critic network(s) (online) & 507 KB & 1.01 MB \\
-Critic network(s) (target) & 507 KB & 1.01 MB \\
-Replay buffer & 440 MB & 440 MB \\
-\hline
-\textbf{Total training memory} & \textbf{442 MB} & \textbf{443 MB} \\
-\textbf{Total deployment memory} & \textbf{502 KB} & \textbf{502 KB} \\
-\hline
-\end{tabular}
-\end{table}
 
-The replay buffer dominates memory usage during training, making the difference between DDPG and TD3 negligible ($<$1\% increase). For deployment, memory requirements are identical.
 
 \subsubsection{Hyperparameter Sensitivity}
 \label{subsec:hyperparam_sensitivity}
 
-Based on ablation studies conducted during development:
+Based on studies conducted during development:
 
 \textbf{DDPG Sensitivity:}
 
@@ -695,22 +660,8 @@ TD3 demonstrates moderate sensitivity to actor and critic learning rates, though
 
 \textbf{Practical implication:} TD3 is significantly more robust to hyperparameter choices, making it easier to deploy across different systems without extensive tuning.
 
-\subsubsection{Practical Deployment Considerations}
-\label{subsec:deployment_considerations}
 
-\subsubsection{When to Choose DDPG}
-
-\textbf{Recommended for:}
-
-DDPG is particularly well-suited for proof-of-concept studies, applications where training time is critical and must be minimized, systems with well-characterized dynamics that can benefit from its simpler architecture, scenarios where slightly aggressive control behavior is acceptable, and situations with limited computational resources during the training phase.
-
-\subsubsection{When to Choose TD3}
-
-\textbf{Recommended for:}
-
-TD3 is the preferred choice for production deployments in power systems, safety-critical applications where reliability is paramount, systems requiring high voltage stability with minimal oscillations, operation under uncertain or varying operating conditions, applications that are sensitive to control overshoot and require conservative action selection, and scenarios where training time is not a primary constraint and performance takes precedence.
-
-\subsubsection{Real-Time Implementation Considerations}
+\subsection{Real-Time Implementation Considerations}
 
 Both algorithms are suitable for real-time control:
 
@@ -718,11 +669,7 @@ Both algorithms are suitable for real-time control:
 
 \textbf{Inference time:} $<$ 0.5 ms on modern DSP hardware
 
-\textbf{Hardware requirements:}
-
-The minimum hardware requirement for real-time implementation is a Texas Instruments TMS320F28379D digital signal processor (32-bit, 200 MHz), while the recommended platforms include the dSPACE MicroLabBox or OPAL-RT OP5707 for enhanced performance and flexibility.
-
-\subsubsection{Summary and Recommendations}
+\subsection{Summary}
 \label{subsec:implementation_summary}
 
 \textbf{Key insights:}
@@ -737,6 +684,6 @@ The minimum hardware requirement for real-time implementation is a Texas Instrum
     \item \textbf{Safety:} TD3's more conservative control actions make it preferable for power system applications where overshoot can cause equipment damage
 \end{enumerate}
 
-\textbf{Overall recommendation:} For the DFIG-Solar PV hybrid system, \textbf{TD3 is the preferred choice} for production deployment despite longer training time, due to its superior stability, robustness, and safety characteristics. DDPG remains valuable for rapid prototyping and initial development.
+ For the DFIG-Solar PV hybrid system, \textbf{TD3 is the preferred choice} for production deployment despite longer training time, due to its superior stability, robustness, and safety characteristics. DDPG remains valuable for rapid prototyping and initial development.
 
-The quantitative performance comparison based on OPAL-RT HIL simulation results is presented in Chapter~\ref{chap:td3}.
+The quantitative performance comparison based on OPAL-RT HIL simulation results is presented in Chapter~\ref{chap:experiments}.

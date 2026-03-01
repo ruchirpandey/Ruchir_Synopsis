@@ -1,0 +1,202 @@
+\section*{Appendix A.A2.1 \\ Mathematical Model Used for Learning-Based Control}
+
+This section presents the nonlinear state-space model used as the learning 
+environment for the DDPG and TD3 controllers. The DRL agent learns control 
+actions directly from the coupled DFIG–PV–Grid dynamics.
+
+\subsection*{A.A2.1.1 Markov Decision Process (MDP) Formulation}
+
+The control problem is formulated as a Markov Decision Process (MDP):
+
+\begin{equation}
+\mathcal{M} = (S, A, P, R, \gamma)
+\end{equation}
+
+where:
+
+\begin{itemize}
+\item $S$ : Continuous state space
+\item $A$ : Continuous action space
+\item $P$ : State transition probability
+\item $R$ : Reward function
+\item $\gamma \in [0,1]$ : Discount factor
+\end{itemize}
+
+State transition dynamics:
+
+\begin{equation}
+s_{t+1} = f(s_t, a_t) + w_t
+\end{equation}
+
+where $w_t$ represents disturbances and modeling uncertainties.
+
+%----------------------------------------
+\subsection*{A.A2.1.2 State Space Definition}
+
+The 11-dimensional state vector is defined as:
+
+\begin{equation}
+s =
+\begin{bmatrix}
+i_{qs} & i_{ds} & i_{qr} & i_{dr} &
+v_{dc} & i_{pv} &
+P_s & Q_s & P_g & Q_g &
+\theta_r
+\end{bmatrix}^T
+\in \mathbb{R}^{11}
+\end{equation}
+
+This captures:
+
+\begin{itemize}
+\item DFIG electrical states ($i_{qs}, i_{ds}, i_{qr}, i_{dr}$)
+\item DC-link and PV dynamics ($v_{dc}, i_{pv}$)
+\item Grid power flow ($P_s, Q_s, P_g, Q_g$)
+\item Mechanical rotor position ($\theta_r$)
+\end{itemize}
+
+%----------------------------------------
+\subsection*{A.A2.1.3 Action Space Definition}
+
+The DRL agent outputs 4 continuous control signals:
+
+\begin{equation}
+a =
+\begin{bmatrix}
+v_{qr} & v_{dr} & v_{qg} & v_{dg}
+\end{bmatrix}^T
+\in \mathbb{R}^{4}
+\end{equation}
+
+where:
+
+\begin{itemize}
+\item $v_{qr}, v_{dr}$ : Rotor-Side Converter (RSC) voltage references
+\item $v_{qg}, v_{dg}$ : Grid-Side Converter (GSC) voltage references
+\end{itemize}
+
+%----------------------------------------
+\subsection*{A.A2.1.4 Nonlinear System Dynamics}
+
+The learning environment is governed by the nonlinear differential equations:
+
+\begin{equation}
+\dot{s} = f(s,a)
+\end{equation}
+
+\subsubsection*{Stator Current Dynamics}
+
+\begin{align}
+\dot{i}_{qs} &= 
+\frac{\omega_b}{L_s^0}
+\left(
+- R_s i_{qs}
++ \omega_s L_s^0 i_{ds}
++ \frac{\omega_r}{\omega_s} e_{qs}^0
+- \frac{1}{T_r \omega_s} e_{ds}^0
+- v_{qs}
++ \frac{L_m}{L_r} v_{qr}
+\right)
+\\
+\dot{i}_{ds} &=
+\frac{\omega_b}{L_s^0}
+\left(
+- \omega_s L_s^0 i_{qs}
+- R_s i_{ds}
++ \frac{1}{T_r \omega_s} e_{qs}^0
++ \frac{\omega_r}{\omega_s} e_{ds}^0
+- v_{ds}
++ \frac{L_m}{L_r} v_{dr}
+\right)
+\end{align}
+
+%----------------------------------------
+\subsubsection*{Rotor Mechanical Dynamics}
+
+\begin{equation}
+\dot{\omega}_r =
+\frac{1}{J}
+\left(
+T_m - T_e - B \omega_r
+\right)
+\end{equation}
+
+%----------------------------------------
+\subsubsection*{DC-Link Voltage Dynamics}
+
+\begin{equation}
+\dot{v}_{dc} =
+\frac{1}{C}
+\left(
+i_{pv} + i_{r,dc} - i_{g,dc}
+\right)
+\end{equation}
+
+This equation represents the tightly coupled power balance of the hybrid system.
+
+%----------------------------------------
+\subsection*{A.A2.1.5 Reward Function Structure}
+
+The reward is defined as a multi-objective quadratic penalty:
+
+\begin{equation}
+r_t =
+- \left(
+w_1 (v_{dc} - v_{dc}^*)^2
++ w_2 (P_s - P_s^*)^2
++ w_3 (Q_s - Q_s^*)^2
++ w_4 (P_g - P_g^*)^2
++ w_5 (Q_g - Q_g^*)^2
+\right)
+\end{equation}
+
+The reward forces the agent to simultaneously:
+
+\begin{itemize}
+\item Regulate DC-link voltage
+\item Track active and reactive power references
+\item Maintain grid compliance
+\item Ensure stable multi-source power coordination
+\end{itemize}
+
+%----------------------------------------
+\subsection*{A.A2.1.6 Final Learning Objective}
+
+The actor network learns a deterministic policy:
+
+\begin{equation}
+a_t = \mu_\theta (s_t)
+\end{equation}
+
+The critic estimates:
+
+\begin{equation}
+Q_\phi (s_t, a_t)
+\end{equation}
+
+The objective is to maximize expected return:
+
+\begin{equation}
+J(\theta) =
+\mathbb{E}
+\left[
+\sum_{t=0}^{\infty}
+\gamma^t r_t
+\right]
+\end{equation}
+
+Thus, the DRL controller replaces multiple cascaded PI loops with a unified nonlinear optimal control policy.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth, height=0.96\textheight, keepaspectratio]{images/DDPGTraining (1).png}
+    \caption{Flowchart of DDPG Training}
+    \label{fig:DDPGTraining_mppt_flowchart}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth, height=0.96\textheight, keepaspectratio]{images/TD3Training.png}
+    \caption{Flowchart of TD3 Training}
+    \label{fig:TD3Training_mppt_flowchart}
+\end{figure}

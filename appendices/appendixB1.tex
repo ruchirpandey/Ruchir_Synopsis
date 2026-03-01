@@ -1,0 +1,19 @@
+\section{Perturb and Observe Method}
+
+The Perturb and Observe (P\&O) method is the most widely used Maximum Power Point Tracking (MPPT) algorithms in photovoltaic (PV) systems. It is simple and  has minimal sensor requirement. The algorithm operates by perturbing the operating voltage by varying the duty cycle of the boost converter by a small incremental step and observing the corresponding change in output power. If the perturbation of duty leads to an increase in power (ΔP > 0), the algorithm continues perturbing in the same direction; if the power decreases (ΔP < 0) then the direction of perturbation is reversed. This iterative process drives the operating point toward the Maximum Power Point (MPP) on the P-V characteristic curve of the solar panel.
+
+\section{Selection of P\&O for Solar PV-Integrated DFIG System}
+In the present work, the P\&O algorithm is selected for MPPT control of the solar PV subsystem integrated with the Doubly Fed Induction Generator (DFIG)-based wind energy system for following reasons.
+
+\begin{enumerate}
+\item The computational simplicity of P\&O makes it highly suitable for real-time implementation, which is critical in a hybrid system where the primary control burden is already carried by the other controllers. Delegating PV-side MPPT to a lightweight algorithm like P\&O ensures that system resources are not unnecessarily consumed.
+\item P\&O exhibits tracking accuracy comparable to  computationally intensive methods such as Incremental Conductance (INC) for the stable and slowly varying solar irradiance. 
+\item The boost converter is interfacing the PV array to the DC link and P\&O directly regulates the duty cycle of this converter, It is very simple and doesn't introduce any significant overhead for Reinforcement Learning.
+% \clearpage
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth, height=0.92\textheight, keepaspectratio]{images/flow_mppt.drawio (3).png}
+    \caption{Flowchart of Perturb and Observe (P\&O) MPPT Algorithm with Boost Converter}
+    \label{fig:po_mppt_flowchart}
+\end{figure}
+% \clearpage

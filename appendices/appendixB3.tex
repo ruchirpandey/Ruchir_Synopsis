@@ -1,0 +1,117 @@
+\subsection*{A.A3.1 Neural Network Architecture and Design Selection}
+
+This section presents the neural network architecture adopted for the Deep Deterministic Policy Gradient (DDPG) and Twin-Delayed Deep Deterministic Policy Gradient (TD3) controllers, along with the technical justification for the selected structure and activation functions.
+
+\subsubsection*{A.A3.1.1 Actor Network Architecture}
+
+The actor network implements a deterministic policy mapping the complete system state to the converter voltage references:
+
+\begin{equation}
+a = \mu_\theta(s)
+\end{equation}
+
+where $s \in \mathbb{R}^{11}$ represents the full system state vector and 
+$a \in \mathbb{R}^{4}$ denotes the control actions 
+$[v_{qr}, v_{dr}, v_{qg}, v_{dg}]^T$.
+
+The adopted architecture is:
+
+\begin{equation}
+[11] \rightarrow [400] \rightarrow [300] \rightarrow [4]
+\end{equation}
+
+\begin{itemize}
+\item Input Layer: 11 neurons (state vector)
+\item Hidden Layer 1: 400 neurons
+\item Hidden Layer 2: 300 neurons
+\item Output Layer: 4 neurons (converter voltage references)
+\end{itemize}
+
+The forward propagation is given by:
+
+\begin{align}
+h_1 &= \sigma(W_1 s + b_1) \\
+h_2 &= \sigma(W_2 h_1 + b_2) \\
+a   &= \tanh(W_3 h_2 + b_3)
+\end{align}
+
+where $W_i$ and $b_i$ represent weights and biases, respectively.
+
+The total number of trainable parameters in the actor network is approximately 125,504, which was verified to be computationally feasible for real-time deployment on the OPAL-RT platform.
+
+\subsubsection*{A.A3.1.2 Critic Network Architecture}
+
+For DDPG, a single critic network approximates the state–action value function:
+
+\begin{equation}
+Q_\phi(s,a)
+\end{equation}
+
+The critic input dimension is 15 (11 state variables + 4 action variables), with architecture:
+
+\begin{equation}
+[15] \rightarrow [400] \rightarrow [300] \rightarrow [1]
+\end{equation}
+
+For TD3, two identical critic networks are employed:
+
+\begin{equation}
+Q_{\phi_1}(s,a), \quad Q_{\phi_2}(s,a)
+\end{equation}
+
+The twin-critic structure mitigates overestimation bias by using:
+
+\begin{equation}
+y = r + \gamma \min(Q_{\phi_1'}, Q_{\phi_2'})
+\end{equation}
+
+thereby improving learning stability and robustness.
+
+\subsubsection*{A.A3.1.3 Activation Function Selection}
+
+\paragraph{Hidden Layers – ReLU}
+
+The hidden layers utilize the Rectified Linear Unit (ReLU):
+
+\begin{equation}
+\sigma(x) = \max(0, x)
+\end{equation}
+
+ReLU was selected due to:
+
+\begin{itemize}
+\item Mitigation of vanishing gradient problems
+\item Faster convergence during training
+\item Reduced computational complexity for real-time implementation
+\end{itemize}
+
+Given the strongly nonlinear and coupled DFIG–PV dynamics, ReLU provides stable gradient propagation while enabling sufficient function approximation capability.
+
+\paragraph{Output Layer – Hyperbolic Tangent (tanh)}
+
+The actor output layer employs the hyperbolic tangent activation:
+
+\begin{equation}
+\tanh(x) \in [-1,1]
+\end{equation}
+
+This ensures that control outputs remain bounded within normalized modulation limits. The final voltage references are obtained via scaling:
+
+\begin{equation}
+v = V_{\max} \cdot \tanh(\cdot)
+\end{equation}
+
+This bounded output guarantees compatibility with SPWM modulation constraints and prevents over modulation.
+
+\subsubsection*{A.A3.1.4 Architectural Justification}
+
+The selected two-hidden-layer architecture balances learning capability and real-time deployability. The hybrid DFIG–PV system exhibits:
+
+\begin{itemize}
+\item Strong nonlinear electromagnetic coupling
+\item Multi-timescale dynamics
+\item Shared DC-link power interactions
+\item Multi-objective control requirements
+\end{itemize}
+
+A smaller neural network could cause underfitting, while a bigger network would increase training time and deployment complexity. This neural network provides sufficient nonlinear approximation while maintaining suitable inference complexity for hardware-in-the-loop implementation.

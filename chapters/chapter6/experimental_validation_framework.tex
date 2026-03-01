@@ -632,7 +632,7 @@ Figure~\ref{fig:pv_step} illustrates system response to a solar PV current step 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{images/Run4_M1_Solar.png}
-    \caption{System response to solar PV current step showing: (1) DC link voltage ($V_{dc}$) regulation, (2) PV current ($I_{solar}$) tracking, and (3) PV power ($P_{solar}$) variation with TD3 controller maintaining tight voltage regulation within $\pm 4.6$\% during transient}
+    \caption{System response to solar PV current step}
     \label{fig:pv_step}
 \end{figure}
 
@@ -667,7 +667,7 @@ Figure~\ref{fig:wind_step} presents DC link voltage response to wind speed step 
         \caption{TD3 controller}
         \label{fig:vdc_td3}
     \end{subfigure}
-    \caption{Dynamic response of DC link voltage to wind speed step change: (a) PI controller shows $\pm 5$\% regulation with 118 ms settling time, (b) DDPG controller achieves $\pm 4.8$\% regulation with 102 ms settling time, (c) TD3 controller demonstrates tightest regulation at $\pm 4.6$\% with fastest settling time of 98 ms}
+    \caption{Dynamic response of DC link voltage to wind speed step change}
     \label{fig:wind_step}
 \end{figure}
 
@@ -702,7 +702,7 @@ Figure~\ref{fig:rotor_current} illustrates rotor current response to simultaneou
         \caption{TD3 controller}
         \label{fig:rotor_td3}
     \end{subfigure}
-    \caption{Dynamic response of rotor current to simultaneous variations in wind speed and solar PV input: (a) PI controller shows oscillatory behavior with longest settling time of 40 ms, (b) DDPG controller achieves moderate settling time of 36 ms with minor oscillations, (c) TD3 controller demonstrates smoothest response with fastest settling time of 34 ms and optimal damping}
+    \caption{Dynamic response of rotor current to simultaneous variations in wind speed and solar PV input}
     \label{fig:rotor_current}
 \end{figure}
 

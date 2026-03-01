@@ -181,19 +181,17 @@ This research makes following contributions to the field:
 The thesis is structured to provide a comprehensive treatment of DRL-based control for DFIG-PV hybrid systems, progressing from theoretical foundations through experimental validation to critical analysis:
 
 \begin{itemize}
-    \item \textbf{Chapter~\ref{chap:introduction}} (Current Chapter) establishes the research context, motivation, and objectives, including recent advances in DRL applications for renewable energy systems.
+    \item \textbf{Chapter~\ref{chap:introduction}}  establishes the research context, motivation, and objectives, including recent advances in DRL applications for renewable energy systems.
     
-    \item \textbf{Chapter~\ref{chap:literature}} provides an extensive survey of relevant literature spanning: hybrid renewable energy systems, DFIG control strategies, solar PV integration techniques, deep reinforcement learning fundamentals, and recent applications of DRL in power systems with emphasis on 2023-2025 developments.
+    \item \textbf{Chapter~\ref{chap:literature}} provides a survey of relevant literature spanning: hybrid renewable energy systems, DFIG control strategies, solar PV integration techniques, deep reinforcement learning fundamentals, and recent applications of DRL in power systems with emphasis on 2023-2025 developments.
     
-    \item \textbf{Chapter~\ref{chap:modeling}} details the comprehensive system modeling framework including: DFIG electromagnetic and mechanical models, solar PV single-diode equivalent circuit, DC-link dynamics, power converter models (RSC and GSC), and grid interface representation.
+    \item \textbf{Chapter~\ref{chap:model}} details the comprehensive system modeling framework including: DFIG electromagnetic and mechanical models, solar PV single-diode equivalent circuit, DC-link dynamics, power converter models (RSC and GSC), and grid interface representation.
     
        
-    \item \textbf{Chapter~\ref{sec:ddpg_implementation}} describes DDPG methodology including: environment formulation, state-action space design, reward function development, neural network architectures, training procedures. It also presents the TD3 algorithm including: algorithmic enhancements over DDPG, implementation details, hyperparameter optimization, curriculum learning strategies, and comparative training analysis.
+    \item \textbf{Chapter~\ref{chap:ddpg_implementation}} describes DDPG methodology including: environment formulation, state-action space design, reward function development, neural network architectures, training procedures. It also presents the TD3 algorithm including: algorithmic enhancements over DDPG, implementation details, hyperparameter optimization, curriculum learning strategies, and comparative training analysis.
     
-    \item \textbf{Chapter~\ref{chap:validation_framework}} outlines the comprehensive HIL experimental setup including: OPAL-RT platform specifications, system parameter configuration, test scenario design, data acquisition protocols, and validation methodology aligned with industry standards \cite{Prabakar2019_NREL,vonJouanne2023}.    
-      It also provides detailed performance analysis including: steady-state operation results, transient response characterization, DDPG vs. TD3 comparative metrics, power quality analysis, computational performance assessment, and benchmarking against PI and adaptive control baselines.
-    
-    \item \textbf{Chapter~\ref{chap:discussion}} offers critical discussion of findings including: interpretation of performance differences, analysis of algorithm strengths and limitations, practical deployment considerations, computational feasibility for real-time control, and positioning of results within the broader context of recent literature \cite{Smahi2025,He2024,Liang2024}.
+    \item \textbf{Chapter~\ref{chap:experiments}} outlines the comprehensive HIL experimental setup including: OPAL-RT platform specifications, system parameter configuration, test scenario design and validation methodology aligned with industry standards \cite{Prabakar2019_NREL,vonJouanne2023}.    
+      It also provides detailed performance analysis including: steady-state operation results, transient response characterization, DDPG vs. TD3 comparative metrics and benchmarking against PI control baselines. It also discusses experimental findings including interpretation of performance differences, analysis of algorithm strengths and limitations, practical deployment considerations, computational feasibility for real-time control, and results and expectations\cite{Smahi2025,He2024,Liang2024}.
     
     \item \textbf{Chapter~\ref{chap:conclusions}} discusses the results and give conclude the summary of key findings, novel contributions to knowledge, practical implications for industry, limitations of the current work, and detailed recommendations for future research directions including multi-agent extensions and integration with physics-informed machine learning \cite{WindStoragePINN2024}.
 \end{itemize}

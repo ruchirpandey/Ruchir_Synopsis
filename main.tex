@@ -23,10 +23,7 @@
 \newfontfamily\hindifont[Script=Devanagari]{Noto Sans Devanagari}
 \newfontfamily\hindifontsf[Script=Devanagari]{Noto Sans Devanagari}
 \newfontfamily\hindifonttt[Script=Devanagari]{Noto Sans Devanagari}
-% \newfontfamily\newsgothicfont{News Gothic BT}
-\newfontfamily\newsgothicfont{Liberation Sans} % Open source alternative
-% \newfontfamily\newsgothicfont{Helvetica}      %
-
+\newfontfamily\newsgothicfont{Liberation Sans} 
 \cftsetindents{chapter}{1.5em}{3em}   
 \cftsetindents{section}{1.5em}{3em}
 \cftsetindents{subsection}{4em}{4em}
@@ -68,7 +65,8 @@
     {\fontsize{16}{18}\selectfont\textbf{CHAPTER - \thechapter}}\\[0.5cm]
     {\fontsize{16}{18}\selectfont\textbf{\MakeUppercase{#2}}}\\[0.5cm]
   \end{flushright}
-  \noindent\underline{\makebox[\textwidth][l]{\leaders\hbox{\textbf{--}}\hfill}}
+  \noindent\rule{\textwidth}{1.5pt}\\[-1.3em]
+\noindent\rule{\textwidth}{0.4pt}
   \vspace{0.5cm}
 }
 
@@ -179,6 +177,52 @@
   \renewcommand{\headrulewidth}{0.4pt}
 }
 
+
+% Appendix Custom Chapters
+
+\setcounter{chapter}{0}
+\renewcommand{\thechapter}{A.\arabic{chapter}}
+\renewcommand{\thesection}{\thechapter.\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+
+% Define page styles for appendix chapters
+\fancypagestyle{appendixB1}{
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0.1pt}
+  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Appendix A.A1: Perturb and Observe MPPT Method}}}}
+  \fancyfoot[C]{\textcolor{wordfade}\thepage}
+}
+
+\fancypagestyle{appendixB2}{
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0.1pt}
+  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Appendix A.A2: Mathematical Model Used for Learning-Based Control}}}}
+  \fancyfoot[C]{\textcolor{wordfade}\thepage}
+}
+
+\fancypagestyle{appendixB3}{
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0.1pt}
+  \fancyhead[R]{\textcolor{wordfade}{\fontsize{12pt}\textbf{\textit{Appendix A.A3: Neural Network Architectures}}}}
+  \fancyfoot[C]{\textcolor{wordfade}\thepage}
+}
+
+% Redefine customchapter to show "APPENDIX" label
+\newcommand{\customappendix}[2]{%
+  \clearpage
+  \setcounter{section}{0}
+  \setcounter{subsection}{0}
+  \refstepcounter{chapter}
+  \addcontentsline{toc}{chapter}{\textbf{APPENDIX - \thechapter: \MakeUppercase{#2}}}
+  \begin{flushright}
+    {\fontsize{16}{18}\selectfont\textbf{APPENDIX - \thechapter}}\\[0.5cm]
+    {\fontsize{16}{18}\selectfont\textbf{\MakeUppercase{#2}}}\\[0.5cm]
+  \end{flushright}
+  \noindent\rule{\textwidth}{1.5pt}\\[-0.6em]
+\noindent\rule{\textwidth}{0.4pt}
+  \vspace{0.5cm}
+}
+
 \begin{document}
 
 \include{additionalPages/titlePage}
@@ -286,7 +330,7 @@
 \newpage
 \customchapter{1}{\MakeUppercase{Introduction and Overview}}
 \label{chap:introduction}
-\thispagestyle{chapterA2}
+\thispagestyle{chapterA1}
 \pagestyle{chapterA1}
 \input{chapters/chapter1/intro}
 
@@ -297,29 +341,23 @@
 \pagestyle{chapterA2}
 \input{chapters/chapter2/literature_review}
 
-% \newpage
-% \customchapter{3}{\MakeUppercase{System Configuration}}
-% \label{chap:modeling}
-% \thispagestyle{chapterA3}
-% \pagestyle{chapterA3}
-% \input{chapters/chapter3/system_configuration}
 
 \newpage
 \customchapter{3}{\MakeUppercase{System Architecture and Modelling}}
-\label{chap:rl}
+\label{chap:model}
 \thispagestyle{chapterA3}
 \pagestyle{chapterA3}
 \input{chapters/chapter5/modelling_and_simulation}
 
 \newpage
 \customchapter{4}{\MakeUppercase{Control Strategies}}
-\label{chap:ddpg}
+\label{chap:ddpg_implementation}
 \thispagestyle{chapterA4}
 \pagestyle{chapterA4}
 \input{chapters/chapter4/control_strategies}
 \newpage
 \customchapter{5}{\MakeUppercase{Experimental Validation and Performance Evaluation}}
-\label{chap:td3}
+\label{chap:experiments}
 \thispagestyle{chapterA5}
 \pagestyle{chapterA5}
 \input{chapters/chapter6/experimental_validation_framework}
@@ -338,59 +376,9 @@
 \bibliographystyle{IEEEtran}
 \bibliography{references/references}
 
-% NOTE: All references are managed in references/references.bib
-% Use BibTeX compilation: xelatex -> bibtex -> xelatex -> xelatex
-
-% ==================== APPENDICES ====================
-% NOTE: Appendices can be added here if needed for additional technical details,
-% derivations, code listings, or supplementary results.
-% Uncomment and expand the sections below as required.
-
-% \appendix
-%
-% \chapter{Mathematical Derivations}
-%
-% \section{DFIG d-q Transformation}
-% Detailed derivation of the Park transformation from abc to dq reference frame,
-% including inverse transformation and power invariance properties.
-%
-% \section{TD3 Convergence Analysis}
-% Theoretical analysis of TD3 convergence properties, including conditions
-% for policy convergence and value function approximation error bounds.
-%
-% \chapter{Neural Network Architectures}
-%
-% \section{Network Layer Details}
-% Complete specifications of actor and critic network architectures including
-% layer dimensions, activation functions, initialization schemes, and regularization.
-%
-% \section{Activation Function Analysis}
-% Comparative analysis of ReLU, tanh, sigmoid, and other activation functions
-% for power system control applications.
-%
-% \chapter{Additional Simulation Results}
-%
-% \section{Extended Test Scenarios}
-% Comprehensive results under additional operating conditions including
-% extreme wind speeds, variable solar irradiance profiles, and grid disturbances.
-%
-% \section{Sensitivity Analysis}
-% Detailed sensitivity analysis examining controller performance degradation
-% under parameter uncertainties and model mismatches.
-%
-% \chapter{Implementation Code}
-%
-% \section{TD3 Algorithm Implementation}
-% Complete Python implementation of TD3 training algorithm including
-% experience replay, target networks, and hyperparameter configurations.
-%
-% \section{MATLAB/Simulink Models}
-% Description and diagrams of MATLAB/Simulink models used for
-% system simulation and OPAL-RT HIL deployment.
-
 % ==================== LIST OF PUBLICATIONS ====================
-\chapter*{List of Publications}
-\addcontentsline{toc}{chapter}{List of Publications}
+\chapter*{LIST OF PUBLICATIONS}
+\addcontentsline{toc}{chapter}{LIST OF PUBLICATIONS}
 
 \section*{Journal Publications}
 
@@ -405,4 +393,31 @@
 \begin{enumerate}
     \item R.~Pandey, S.~Bose, P.~Dwivedi, and S.~Negi, ``Real-time performance investigation of a solar PV integrated DFIG system,'' in \textit{Proc. IEEE 10th Power India International Conference (PIICON)}, New Delhi, India, Nov. 2022, pp.~1--6. DOI: 10.1109/PIICON56320.2022.10045115.
 \end{enumerate}
+
+
+\setcounter{chapter}{0}
+\renewcommand{\thechapter}{A.A\arabic{chapter}}
+
+\newpage
+\customappendix{1}{Perturb and Observe MPPT Method }
+\label{app:mppt}
+\thispagestyle{appendixB1}
+\pagestyle{appendixB1}
+\input{appendices/appendixB1}
+
+\newpage
+\customappendix{2}{ Mathematical Model Used for Learning-Based Control}
+\label{app:nn}
+\thispagestyle{appendixB2}
+\pagestyle{appendixB2}
+\input{appendices/appendixB2}
+
+\newpage
+\customappendix{3}{Neural Network Architecture}
+\label{app:results}
+\thispagestyle{appendixB3}
+\pagestyle{appendixB3}
+\input{appendices/appendixB3}
+
+
 \end{document}
